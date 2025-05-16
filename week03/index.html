@@ -35,9 +35,23 @@
       }
     ]
   },
-  center: [139.7671, 35.6812],
-  zoom: 12
+  center: [-118.2437, 34.0522],
+  zoom: 3
     });
+    const locations = [
+  { lng: 139.7671, lat: 35.6812, name: "東京駅" },
+  { lng: 135.7586, lat: 34.9855, name: "京都駅" },
+  { lng: 141.3545, lat: 43.0687, name: "札幌駅" }
+];
+
+locations.forEach(loc => {
+  new maplibregl.Marker()
+    .setLngLat([loc.lng, loc.lat])
+    .setPopup(
+      new maplibregl.Popup().setHTML(`<h3>${loc.name}</h3>`)
+    )
+    .addTo(map);
+});
 
     // ポップアップ（吹き出し）を追加
     const popup = new maplibregl.Popup({ offset: 25 })
@@ -45,5 +59,6 @@
       .setHTML("<h3>Hello world!</h3><p>Greetings from LA!🇯🇵</p>")
       .addTo(map);
   </script>
+  
 </body>
 </html>
