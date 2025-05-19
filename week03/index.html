@@ -7,6 +7,27 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div style="position:fixed;z-index:1000;top:10px;left:10px;background:rgba(255,255,255,0.92);padding:7px 12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11px;line-height:1.5;">
+    <b style="font-size:12px;">留学可能大学マップ</b>
+    <ul style="list-style:none;padding:0;margin:6px 0 0 0;">
+      <li>
+        <span style="display:inline-block;width:10px;height:10px;background:#1976d2;border-radius:50%;border:1px solid #fff;vertical-align:middle;margin-right:4px;"></span>
+        <span>北米・カナダ</span>
+      </li>
+      <li>
+        <span style="display:inline-block;width:10px;height:10px;background:pink;border-radius:50%;border:1px solid #fff;vertical-align:middle;margin-right:4px;"></span>
+        <span>アジア</span>
+      </li>
+      <li>
+        <span style="display:inline-block;width:10px;height:10px;background:#00C9A7;border-radius:50%;border:1px solid #fff;vertical-align:middle;margin-right:4px;"></span>
+        <span>ヨーロッパ</span>
+      </li>
+      <li>
+        <span style="display:inline-block;width:10px;height:10px;background:#60E2E5;border-radius:50%;border:1px solid #fff;vertical-align:middle;margin-right:4px;"></span>
+        <span>オセアニア・ミクロネシア</span>
+      </li>
+    </ul>
+  </div>
   <div id="map"></div>
 
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
@@ -35,29 +56,153 @@
       }
     ]
   },
-  center: [-118.2437, 34.0522],
-  zoom: 3
+  center: [0, 20], // 世界全体が見えるように中央を大西洋付近に
+  zoom: 1.2        // ズームを小さくして全体表示
     });
-    const locations = [
-  { lng: 139.7671, lat: 35.6812, name: "東京駅" },
-  { lng: 135.7586, lat: 34.9855, name: "京都駅" },
-  { lng: 141.3545, lat: 43.0687, name: "札幌駅" }
+
+    // ポップアップ（吹き出し）を追加
+const popupContent = document.createElement('div');
+popupContent.style.position = 'relative';
+popupContent.innerHTML = `
+  <h3 style="margin:8px 0 0 0;">This is Reitaku University!</h3>
+`;
+
+const popup = new maplibregl.Popup({
+  offset: 25,
+  className: 'custom-popup'
+})
+  .setLngLat([139.9545, 35.8251])
+  .setDOMContent(popupContent)
+  .addTo(map);
+
+    // 大学リスト（緯度経度は代表的なキャンパスのものです）
+const universities = [
+  { name: "オレゴン大学", lng: -123.0781, lat: 44.0455 },
+  { name: "サンノゼ州立大学", lng: -121.8853, lat: 37.3352 },
+  { name: "セイラム州立大学", lng: -70.8910, lat: 42.5195 },
+  { name: "セント・マーチンズ大学", lng: -122.8174, lat: 47.0447 },
+  { name: "ハワイ大学リーワード・コミュニティカレッジ", lng: -158.0541, lat: 21.3936 },
+  { name: "フィッチバーグ州立大学", lng: -71.7793, lat: 42.5865 },
+  { name: "ポートランド州立大学", lng: -122.6847, lat: 45.5111 },
+  { name: "ボストン大学", lng: -71.1056, lat: 42.3505 },
+  { name: "マレー州立大学", lng: -88.3268, lat: 36.6103 },
+  { name: "ミドル・テネシー州立大学", lng: -86.3730, lat: 35.8456 },
+  { name: "南イリノイ大学", lng: -89.2182, lat: 37.7138 },
+  { name: "レッドランズ大学", lng: -117.1634, lat: 34.0633 },
+  { name: "プリンス・エドワード・アイランド大学", lng: -63.1311, lat: 46.2656 },
+  { name: "ランガラ・カレッジ", lng: -123.1162, lat: 49.2246 }
 ];
 
-locations.forEach(loc => {
-  new maplibregl.Marker()
-    .setLngLat([loc.lng, loc.lat])
-    .setPopup(
-      new maplibregl.Popup().setHTML(`<h3>${loc.name}</h3>`)
-    )
+// ピンを地図に追加
+universities.forEach(u => {
+  const el = document.createElement('div');
+  el.style.width = '10px';
+  el.style.height = '10px';
+  el.style.background = '#1976d2';
+  el.style.borderRadius = '50%';
+  el.style.border = '1.5px solid white';
+
+  new maplibregl.Marker({ element: el })
+    .setLngLat([u.lng, u.lat])
+    .setPopup(new maplibregl.Popup({ offset: 15 }).setHTML(
+      `<div style="font-size:10px;">${u.name}</div>`
+    ))
     .addTo(map);
 });
 
-    // ポップアップ（吹き出し）を追加
-    const popup = new maplibregl.Popup({ offset: 25 })
-      .setLngLat([-118.2437, 34.0522])
-      .setHTML("<h3>Hello world!</h3><p>Greetings from LA!🇯🇵</p>")
-      .addTo(map);
+const asianUniversities = [
+  { name: "タズキア・イスラム経済大学", country: "インドネシア", lng: 106.6537, lat: -6.6246 },
+  { name: "国立ハンバット大学校", country: "韓国", lng: 127.3466, lat: 36.3540 },
+  { name: "釜山外国語大学校クロス留学", country: "韓国", lng: 129.0914, lat: 35.2226 },
+  { name: "ナンヤン・ポリテクニック", country: "シンガポール", lng: 103.8492, lat: 1.3800 },
+  { name: "サイアム大学", country: "タイ", lng: 100.3257, lat: 13.7261 },
+  { name: "ナレースワン大学", country: "タイ", lng: 100.1940, lat: 16.7471 },
+  { name: "パヤップ大学", country: "タイ", lng: 99.0176, lat: 18.7961 },
+  { name: "マヒドン大学(共同研究のみ)", country: "タイ", lng: 100.3226, lat: 13.7934 },
+  { name: "淡江大学クロス留学", country: "台湾", lng: 121.4486, lat: 25.1794 },
+  { name: "国立屏東大学", country: "台湾", lng: 120.4948, lat: 22.6720 },
+  { name: "静宜大学", country: "台湾", lng: 120.5975, lat: 24.2257 },
+  { name: "西安外国語大学", country: "中国", lng: 108.8828, lat: 34.2332 },
+  { name: "天津財経大学", country: "中国", lng: 117.1741, lat: 39.1236 },
+  { name: "天津理工大学", country: "中国", lng: 117.1456, lat: 39.0645 },
+  { name: "パーペチュアル・ヘルプ大学", country: "フィリピン", lng: 120.9832, lat: 14.4576 },
+  { name: "ホーチミン市人文社会科学大学(留学受け入れのみ)", country: "ベトナム", lng: 106.6822, lat: 10.7769 },
+  { name: "国立マレーシア科学大学", country: "マレーシア", lng: 100.2983, lat: 5.3573 },
+  { name: "新モンゴル日馬富士学園(留学受け入れのみ)", country: "モンゴル", lng: 106.9177, lat: 47.9226 }
+];
+
+// ピンク色のピンを地図に追加
+asianUniversities.forEach(u => {
+  const el = document.createElement('div');
+  el.style.width = '10px';
+  el.style.height = '10px';
+  el.style.background = 'pink';
+  el.style.borderRadius = '50%';
+  el.style.border = '1.5px solid white';
+
+  new maplibregl.Marker({ element: el })
+    .setLngLat([u.lng, u.lat])
+    .setPopup(new maplibregl.Popup({ offset: 15 }).setHTML(
+      `<div style="font-size:10px;">${u.country} ${u.name}</div>`
+    ))
+    .addTo(map);
+});
+
+const europeUniversities = [
+  { name: "リーズ大学", country: "イギリス", lng: -1.5536, lat: 53.8067 },
+  { name: "ロンドン大学", country: "イギリス", lng: -0.1276, lat: 51.5074 },
+  { name: "フォンティス応用科学大学", country: "オランダ", lng: 5.4697, lat: 51.4416 },
+  { name: "イェーナ・フリードリヒ・シラー大学クロス留学", country: "ドイツ", lng: 11.5899, lat: 50.9271 },
+  { name: "ヴィッテン・ヘアデッケ大学", country: "ドイツ", lng: 7.3531, lat: 51.4333 },
+  { name: "ヴッパータール大学クロス留学", country: "ドイツ", lng: 7.1482, lat: 51.2562 },
+  { name: "バウハウス大学", country: "ドイツ", lng: 11.3235, lat: 50.9795 },
+  { name: "ハレ=ヴィッテンベルク・マルチン・ルター大学クロス留学", country: "ドイツ", lng: 11.9697, lat: 51.4862 },
+  { name: "フレンスブルク大学", country: "ドイツ", lng: 9.4000, lat: 54.7826 },
+  { name: "マールブルク大学クロス留学", country: "ドイツ", lng: 8.7746, lat: 50.8081 },
+  { name: "レーゲンスブルク大学", country: "ドイツ", lng: 12.0956, lat: 48.9974 },
+  { name: "ロストック大学", country: "ドイツ", lng: 12.1348, lat: 54.0853 }
+];
+
+// エメラルドグリーンのピンを地図に追加
+europeUniversities.forEach(u => {
+  const el = document.createElement('div');
+  el.style.width = '10px';
+  el.style.height = '10px';
+  el.style.background = '#00C9A7'; // エメラルドグリーン
+  el.style.borderRadius = '50%';
+  el.style.border = '1.5px solid white';
+
+  new maplibregl.Marker({ element: el })
+    .setLngLat([u.lng, u.lat])
+    .setPopup(new maplibregl.Popup({ offset: 15 }).setHTML(
+      `<div style="font-size:10px;">${u.country} ${u.name}</div>`
+    ))
+    .addTo(map);
+});
+
+const oceaniaUniversities = [
+  { name: "クイーンズランド大学", country: "オーストラリア", lng: 153.0137, lat: -27.4975 },
+  { name: "サザンクロス大学", country: "オーストラリア", lng: 153.2871, lat: -28.8267 },
+  { name: "ラングポーツ・English Language College", country: "オーストラリア", lng: 153.0251, lat: -27.4698 },
+  { name: "カレッジ・オブ・ミクロネシア", country: "ミクロネシア連邦", lng: 158.2092, lat: 6.9640 }
+];
+
+// ティファニーブルーのピンを地図に追加
+oceaniaUniversities.forEach(u => {
+  const el = document.createElement('div');
+  el.style.width = '10px';
+  el.style.height = '10px';
+  el.style.background = '#60E2E5'; // ティファニーブルー
+  el.style.borderRadius = '50%';
+  el.style.border = '1.5px solid white';
+
+  new maplibregl.Marker({ element: el })
+    .setLngLat([u.lng, u.lat])
+    .setPopup(new maplibregl.Popup({ offset: 15 }).setHTML(
+      `<div style="font-size:10px;">${u.country} ${u.name}</div>`
+    ))
+    .addTo(map);
+});
   </script>
   
 </body>
