@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Chiba Bike Theft Analysis</title>
+	<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+	<style>
+		body { margin: 0; padding: 0; }
+		#map { width: 100%; height: 100vh; }
+	</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="filter-panel" style="position:fixed;bottom:20px;right:20px;background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:10;">
+  <strong>施錠関係フィルター</strong><br>
+  <button onclick="setFilter('all')">全て</button>
+  <button onclick="setFilter('施錠した')">施錠した</button>
+  <button onclick="setFilter('施錠せず')">施錠せず</button>
+  <button onclick="setFilter('その他')">その他</button>
+  <div id="detail" style="margin-top:10px;font-size:14px;"></div>
+</div>
+<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+<script>
+	const map = new maplibregl.Map({
+		container: 'map',
+		style: {
+			version: 8,
+			sources: {
+				'google-tiles': {
+					type: 'raster',
+					tiles: ['https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'],
+					tileSize: 256
+				}
+			},
+			layers: [
+				{
+					id: 'google-tiles-layer',
+					type: 'raster',
+					source: 'google-tiles',
+					minzoom: 0,
+					maxzoom: 19
+				}
+			]
+		},
+		center: [139.7671, 35.6812],
+		zoom: 2
+	});
+    let allBikeTheftData = null;
+    let currentFilter = 'all';
+
+map.on('load', () => {
+	map.addSource('bike', {
+		type: 'geojson',
+		data: 'chibike.geojson'
+	});
+    map.addSource('circle-source', {
+	type: 'geojson',
+	data: { type: 'FeatureCollection', features: [] }
+});
+
+map.addLayer({
+	id: 'circle-layer',
+	type: 'fill',
+	source: 'circle-source',
+	paint: {
+		'fill-color': '#007cbf',
+		'fill-opacity': 0.4
+	}
+});
+
+map.addLayer({
+	id: 'circle-outline-layer',
+	type: 'line',
+	source: 'circle-source',
+	paint: {
+		'line-color': '#ffffff',
+		'line-width': 2
+	}
+});
+
+map.on('click', (e) => {
+	const center = [e.lngLat.lng, e.lngLat.lat];
+	const circle = turf.circle(center, 1, { steps: 64, units: 'kilometers' });
+	map.getSource('circle-source').setData(circle);
+	const bounds = turf.bbox(circle);
+	map.fitBounds(bounds, { padding: 50 });
+
+	// ステップ4に続く処理
+});
+
+	map.addLayer({
+		id: 'bike-layer',
+		type: 'circle',
+		source: 'bike',
+		paint: {
+			'circle-radius': 4,
+			'circle-color': [
+				'match', ['get', '施錠関係'],
+				'施錠した', '#008000',  // 鍵あり → 緑
+				'施錠せず', '#ff0000', // 鍵なし → 赤
+				'#888888'             // その他 → グレー
+			],
+			'circle-stroke-color': '#ffffff',
+			'circle-stroke-width': 1,
+			'circle-opacity': 0.7
+		}
+	});
+
+	fetch('chibike.geojson')
+		.then(response => response.json())
+		.then(data => {
+			allBikeTheftData = data;
+			if (data && data.features.length > 0) {
+				const bounds = turf.bbox(data);
+				map.fitBounds(bounds, { padding: 50 });
+			}
+		});
+});
+let popup = null;
+
+map.on('click', (e) => {
+	const center = [e.lngLat.lng, e.lngLat.lat];
+	const circle = turf.circle(center, 1, { steps: 64, units: 'kilometers' });
+	map.getSource('circle-source').setData(circle);
+
+	let count = 0;
+	allBikeTheftData.features.forEach(f => {
+		if (f.geometry.type === 'Point') {
+			if (turf.booleanPointInPolygon(f, circle)) count++;
+		}
+	});
+
+	if (popup) popup.remove();
+	popup = new maplibregl.Popup()
+		.setLngLat(e.lngLat)
+		.setHTML(`<h3>1km以内の盗難件数</h3><p>${count} 件</p>`)
+		.addTo(map);
+});
+
+function setFilter(status) {
+	if (status === 'all') {
+		map.setFilter('bike-layer', null);
+		document.getElementById('detail').innerHTML = '';
+	} else {
+		map.setFilter('bike-layer', ['==', ['get', '施錠関係'], status]);
+		let count = 0;
+		allBikeTheftData.features.forEach(f => {
+			if (f.geometry.type === 'Point') {
+				if (turf.booleanPointInPolygon(f, circle)) count++;
+			}
+		});
+		document.getElementById('detail').innerHTML = `${status}の件数: ${count} 件`;
+	}
+}
+
+function updateDetail() {
+    if (!allBikeTheftData) return;
+    let filtered = allBikeTheftData.features;
+    if (currentFilter === '施錠した' || currentFilter === '施錠せず') {
+        filtered = filtered.filter(f => f.properties['施錠関係'] === currentFilter);
+    } else if (currentFilter === 'その他') {
+        filtered = filtered.filter(f => f.properties['施錠関係'] !== '施錠した' && f.properties['施錠関係'] !== '施錠せず');
+    }
+    const total = filtered.length;
+    const detailDiv = document.getElementById('detail');
+    detailDiv.innerHTML = `表示件数: <b>${total}</b> 件`;
+}
+
+// GeoJSONロード後に詳細を初期表示
+fetch('chibike.geojson')
+    .then(response => response.json())
+    .then(data => {
+        allBikeTheftData = data;
+        if (data && data.features.length > 0) {
+            const bounds = turf.bbox(data);
+            map.fitBounds(bounds, { padding: 50 });
+        }
+        updateDetail();
+    });
+</script>
+</body>
+</html>
