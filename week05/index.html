@@ -11,12 +11,14 @@
 </head>
 <body>
 <div id="map"></div>
-<div id="filter-panel" style="position:fixed;bottom:20px;right:20px;background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:10;">
+<!-- フィルターパネル内にボタンを追加 -->
+<div id="filter-panel" style="position:fixed;top:20px;right:20px;background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:10;">
   <strong>施錠関係フィルター</strong><br>
   <button onclick="setFilter('all')">全て</button>
   <button onclick="setFilter('施錠した')">施錠した</button>
   <button onclick="setFilter('施錠せず')">施錠せず</button>
   <button onclick="setFilter('その他')">その他</button>
+  <hr>
   <div id="detail" style="margin-top:10px;font-size:14px;"></div>
 </div>
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
@@ -139,19 +141,19 @@ map.on('click', (e) => {
 });
 
 function setFilter(status) {
-	if (status === 'all') {
-		map.setFilter('bike-layer', null);
-		document.getElementById('detail').innerHTML = '';
-	} else {
-		map.setFilter('bike-layer', ['==', ['get', '施錠関係'], status]);
-		let count = 0;
-		allBikeTheftData.features.forEach(f => {
-			if (f.geometry.type === 'Point') {
-				if (turf.booleanPointInPolygon(f, circle)) count++;
-			}
-		});
-		document.getElementById('detail').innerHTML = `${status}の件数: ${count} 件`;
-	}
+    currentFilter = status;
+    if (status === 'all') {
+        map.setFilter('bike-layer', null);
+    } else if (status === 'その他') {
+        map.setFilter('bike-layer', [
+            'all',
+            ['!=', ['get', '施錠関係'], '施錠した'],
+            ['!=', ['get', '施錠関係'], '施錠せず']
+        ]);
+    } else {
+        map.setFilter('bike-layer', ['==', ['get', '施錠関係'], status]);
+    }
+    updateDetail();
 }
 
 function updateDetail() {
