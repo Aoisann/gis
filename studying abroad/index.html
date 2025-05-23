@@ -34,46 +34,47 @@
   <script>
     const map = new maplibregl.Map({
       container: 'map',
-  style: {
-    "version": 8,
-    "sources": {
-      "gsi-std": {
-        "type": "raster",
-        "tiles": [
-          "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"
-        ],
-        "tileSize": 256,
-        "attribution": "© 国土地理院"
-      }
-    },
-    "layers": [
-      {
-        "id": "gsi-std-layer",
-        "type": "raster",
-        "source": "gsi-std",
-        "minzoom": 0,
-        "maxzoom": 18
-      }
-    ]
-  },
-  center: [0, 20], // 世界全体が見えるように中央を大西洋付近に
-  zoom: 1.2        // ズームを小さくして全体表示
+      style: {
+        "version": 8,
+        "sources": {
+          "gsi-std": {
+            "type": "raster",
+            "tiles": [
+              "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"
+            ],
+            "tileSize": 256,
+            "attribution": "© 国土地理院"
+          }
+        },
+        "layers": [
+          {
+            "id": "gsi-std-layer",
+            "type": "raster",
+            "source": "gsi-std",
+            "minzoom": 0,
+            "maxzoom": 18
+          }
+        ]
+      },
+      center: [139.9545, 35.8251], // 麗澤大学を中心に
+      zoom: 1.8 // ←全世界が見えるくらいまで引いた状態
     });
 
-    // ポップアップ（吹き出し）を追加
-const popupContent = document.createElement('div');
-popupContent.style.position = 'relative';
-popupContent.innerHTML = `
-  <h3 style="margin:8px 0 0 0;">This is Reitaku University!</h3>
-`;
+// --- ここから麗澤大学のマーカーをR透過.pngアイコンで表示 ---
+const reitakuIcon = document.createElement('img');
+reitakuIcon.src = 'R透過.png'; // R透過.pngはindex.htmlと同じフォルダに配置
+reitakuIcon.style.width = '52px';
+reitakuIcon.style.height = '52px';
+// ピン画像そのまま使うので、枠や丸め処理は不要
 
-const popup = new maplibregl.Popup({
-  offset: 25,
-  className: 'custom-popup'
+new maplibregl.Marker({
+    element: reitakuIcon,
+    anchor: 'bottom' // 画像下端が座標に合うようにする
 })
   .setLngLat([139.9545, 35.8251])
-  .setDOMContent(popupContent)
   .addTo(map);
+// --- ここまで追加 ---
+
 
     // 大学リスト（緯度経度は代表的なキャンパスのものです）
 const universities = [
@@ -203,6 +204,23 @@ oceaniaUniversities.forEach(u => {
     ))
     .addTo(map);
 });
+
+// --- アジア地域にR-purple.pngのピン画像を追加 ---
+const rPurpleIcon = document.createElement('img');
+rPurpleIcon.src = 'R-purple.png'; // R-purple.pngはindex.htmlと同じフォルダに配置
+rPurpleIcon.style.width = '44px';   // サイズはお好みで調整
+rPurpleIcon.style.height = '44px';
+rPurpleIcon.style.background = 'transparent'; // 念のため背景透過
+rPurpleIcon.style.pointerEvents = 'auto';
+
+// anchor: 'bottom' でピンの先端が座標に合うようにする
+new maplibregl.Marker({
+    element: rPurpleIcon,
+    anchor: 'bottom'
+})
+  .setLngLat([121.4486, 25.1794]) // 例：台湾・淡江大学の位置（アジア地域の代表例）
+  .addTo(map);
+// --- ここまで追加 ---
   </script>
   
 </body>
