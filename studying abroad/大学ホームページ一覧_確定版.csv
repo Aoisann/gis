@@ -1,0 +1,49 @@
+﻿region,country,name,english name,緯度,経度,URL
+北米,アメリカ,オレゴン大学,University of Oregon,44.0521,-123.0868,https://uoregon.edu
+北米,アメリカ,サンノゼ州立大学,San Jose State University,37.3352,-121.8814,https://www.sjsu.edu
+北米,アメリカ,セイラム州立大学,Salem State University,42.5195,-70.8967,https://www.salemstate.edu
+北米,アメリカ,セント・マーチンズ大学,Saint Martin's University,47.037,-122.9064,https://www.stmartin.edu
+北米,アメリカ,ハワイ大学リーワード・コミュニティカレッジ,University of Hawaii–Leeward,21.3914,-157.9511,https://www.leeward.hawaii.edu
+北米,アメリカ,フィッチバーグ州立大学,Fitchburg State University,42.5852,-71.8023,https://www.fitchburgstate.edu
+北米,アメリカ,ポートランド州立大学,Portland State University,45.5122,-122.6832,https://www.pdx.edu
+北米,アメリカ,ボストン大学,Boston University,42.3505,-71.1054,https://www.bu.edu
+北米,アメリカ,マレー州立大学,Murray State University,36.612,-88.3142,https://www.murraystate.edu
+北米,アメリカ,ミドル・テネシー州立大学,Middle Tennessee State University,35.8497,-86.3925,https://www.mtsu.edu
+北米,アメリカ,南イリノイ大学,Southern Illinois University,37.723,-89.2168,https://www.siue.edu
+北米,アメリカ,レッドランズ大学,University of Redlands,34.0633,-117.158,https://www.redlands.edu
+北米,カナダ,プリンス・エドワード・アイランド大学,University of Prince Edward Island,46.2833,-63.1333,https://www.upei.ca
+北米,カナダ,ランガラ・カレッジ,Langara College,49.2328,-123.115,https://langara.ca
+アジア,インドネシア,タズキア・イスラム経済大学,Tazkia Islamic Economic University,-6.5892,106.7861,https://tazkia.ac.id/
+アジア,韓国,国立ハンバット大学校,National University of Hombang,35.1234,128.1234,https://www.hongik.ac.kr
+アジア,韓国,釜山外国語大学校,Busan University of Foreign Studies,35.1796,129.0756,https://www.bufs.ac.kr
+アジア,シンガポール,ナンヤン・ポリテクニック,Nanyang Polytechnic,1.3472,103.8737,https://www.nyp.edu.sg
+アジア,タイ,サイアム大学,Siam University,13.7563,100.567,https://www.siam.edu
+アジア,タイ,ナレースワン大学,Naresuan University,16.4647,100.1042,https://www.nu.ac.th
+アジア,タイ,パヤップ大学,Payap University,18.7884,98.9864,https://www.payap.ac.th
+アジア,タイ,マヒドン大学(共同研究のみ),Mahidol University (Joint Research Only),13.7367,100.532,https://www.mahidol.ac.th
+アジア,台湾,淡江大学クロス留学,Tamkang University (Cross Study),25.1847,121.4068,https://www.tku.edu.tw
+アジア,台湾,国立屏東大学,National Pingtung University,22.6711,120.4933,http://www.nptu.edu.tw/
+アジア,台湾,静宜大学,Providence University,24.14,120.6833,https://www.pu.edu.tw
+アジア,中国,西安外国語大学,Xi'an Foreign Languages University,34.258,108.943,https://www.xisu.edu.cn
+アジア,中国,天津財経大学,Tianjin University of Finance and Economics,38.9875,117.19,https://www.tjufe.edu.cn
+アジア,中国,天津理工大学,Tianjin University of Technology,38.9742,117.1793,https://www.tust.edu.cn
+アジア,フィリピン,パーペチュアル・ヘルプ大学,Perpetual Help University,14.6061,121.019,https://uph-global-academy.co.jp/
+アジア,ベトナム,ホーチミン市人文社会科学大学,University of Social Sciences and Humanities (Ho Chi Minh City),10.7626,106.6969,https://www.hcmussh.edu.vn/
+アジア,マレーシア,国立マレーシア科学大学,National University of Malaysia,2.927,101.7795,https://www.usm.my
+アジア,モンゴル,新モンゴル日馬富士学園,New Mongolia Nihon-Maharu Fuji Academy,47.92,106.917,https://jp.shinemongolharumafuji.edu.mn/%D1%81%D2%AF%D0%BB%D0%B4-%D0%B4%D1%83%D1%83
+ヨーロッパ,イギリス,リーズ大学,University of Leeds,53.8,-1.5491,https://www.leeds.ac.uk
+ヨーロッパ,イギリス,ロンドン大学,University of London,51.5074,-0.1278,https://www.london.ac.uk
+ヨーロッパ,オランダ,フォンティス応用科学大学,Fontys University of Applied Sciences,51.4416,5.4697,https://www.fontys.nl/en/Home.htm
+ヨーロッパ,ドイツ,イェーナ・フリードリヒ・シラー大学,University of Jena (Friedrich Schiller University),50.927,11.588,https://www.uni-jena.de
+ヨーロッパ,ドイツ,ヴィッテン・ヘアデッケ大学,Witten/Herdecke University,51.4333,7.4667,https://www.uni-wh.de/
+ヨーロッパ,ドイツ,ヴィッパータール大学,University of Wuppertal,51.26,7.148,https://www.uni-wuppertal.de
+ヨーロッパ,ドイツ,バウハウス大学,Bauhaus University,50.982,11.032,https://www.uni-weimar.de
+ヨーロッパ,ドイツ,ハレ=ヴィッテンベルク・マルチン・ルター大学,Martin Luther University Halle-Wittenberg,51.481,11.968,https://www.uni-halle.de
+ヨーロッパ,ドイツ,フレンスブルク大学,Flensburg University of Applied Sciences,54.772,9.433,https://www.hs-flensburg.de
+ヨーロッパ,ドイツ,マールブルク大学,Marburg University,50.802,8.766,https://www.uni-marburg.de
+ヨーロッパ,ドイツ,レーゲンスブルク大学,Regensburg University,49.013,12.101,https://www.uni-regensburg.de
+ヨーロッパ,ドイツ,ロストック大学,Rostock University,54.092,12.139,https://www.uni-rostock.de
+オセアニア,オーストラリア,クイーンズランド大学,University of Queensland,-27.4978,153.022,https://www.uq.edu.au
+オセアニア,オーストラリア,サザンクロス大学,Southern Cross University,-28.148,153.451,https://www.scu.edu.au
+オセアニア,オーストラリア,ラングポーツ・English Language College,Langports English Language College,-27.4698,153.0235,https://www.langports.com
+オセアニア,ミクロネシア連邦,カレッジ・オブ・ミクロネシア,College of Micronesia,6.94,158.151,https://www.comfsm.fm
