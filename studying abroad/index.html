@@ -7,7 +7,15 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- 地域の説明を右下に移動・余白を小さく＋フィルター機能追加 -->
+  <!-- ベースマップ選択UI部分を修正 -->
+  <div style="position:fixed;z-index:2000;top:10px;right:10px;background:rgba(255,255,255,0.95);padding:6px 12px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;">
+    <label for="basemap-select" style="font-size:14px;">ベースマップ：</label>
+    <select id="basemap-select">
+      <option value="gsi">国土地理院</option>
+      <option value="carto" selected>CartoDB Positron</option> <!-- ← 名前を変更 -->
+    </select>
+  </div>
+  <!-- 地域の説明・フィルターUIはここから下に続く -->
   <div id="region-legend" style="position:fixed;z-index:1000;bottom:10px;right:10px;background:rgba(255,255,255,0.95);padding:6px 10px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;line-height:1.7;">
     <div style="margin-bottom:4px;font-size:14px;">地域で絞り込み：</div>
     <div id="region-filters" style="margin-bottom:6px; display: flex; flex-direction: column; gap: 8px;">
@@ -43,9 +51,9 @@
 
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
   <script>
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: {
+    // ベースマップスタイル定義
+    const baseStyles = {
+      gsi: {
         "version": 8,
         "sources": {
           "gsi-std": {
@@ -67,6 +75,13 @@
           }
         ]
       },
+      carto: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+    };
+
+    // --- 既存の初期値部分を修正 ---
+    let map = new maplibregl.Map({
+      container: 'map',
+      style: baseStyles.carto, // ← 初期値をCarto Positronに
       center: [139.9545, 35.8251],
       zoom: 1.8
     });
@@ -85,6 +100,43 @@
 
     // --- 大学ピン表示 ---
     let allMarkers = [];
+    let universityList = [];
+    const regionIcon = {
+      "北米": "R-blue.png",
+      "アジア": "R-purple.png",
+      "ヨーロッパ": "R-blue2.png",
+      "オセアニア": "R-orenge.png"
+    };
+
+    // ピンを地図に追加する関数
+    function showMarkersByRegion(selectedRegions) {
+      // 既存マーカーを全て削除
+      allMarkers.forEach(m => m.remove());
+      allMarkers = [];
+      universityList.forEach(u => {
+        if (selectedRegions.includes(u.region)) {
+          let el = document.createElement('img');
+          el.src = regionIcon[u.region];
+          el.style.width = '40px';
+          el.style.height = '40px';
+          el.style.background = 'transparent';
+          el.style.cursor = 'pointer';
+          const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+            .setLngLat([u.lng, u.lat])
+            .setPopup(new maplibregl.Popup({ offset: 15 }).setHTML(
+              `<div style="font-size:13px;">${u.country ? u.country + ' ' : ''}${u.name}</div>`
+            ))
+            .addTo(map);
+          el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            marker.togglePopup();
+          });
+          allMarkers.push(marker);
+        }
+      });
+    }
+
+    // CSV読み込みと初期ピン表示
     fetch('大学ホームページ一覧_確定版.csv')
       .then(response => response.text())
       .then(csv => {
@@ -100,76 +152,52 @@
             return obj;
           });
         }
-
-        const universityList = parseCSV(csv);
-
-        const regionIcon = {
-          "北米": "R-blue.png",
-          "アジア": "R-purple.png",
-          "ヨーロッパ": "R-blue2.png",
-          "オセアニア": "R-orenge.png"
-        };
-
-        // ピンを地図に追加する関数
-        function showMarkersByRegion(selectedRegions) {
-          // 既存マーカーを全て削除
-          allMarkers.forEach(m => m.remove());
-          allMarkers = [];
-          universityList.forEach(u => {
-            if (selectedRegions.includes(u.region)) {
-              let el = document.createElement('img');
-              el.src = regionIcon[u.region];
-              el.style.width = '40px';
-              el.style.height = '40px';
-              el.style.background = 'transparent';
-              el.style.cursor = 'pointer';
-              const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
-                .setLngLat([u.lng, u.lat])
-                .setPopup(new maplibregl.Popup({ offset: 15 }).setHTML(
-                  `<div style="font-size:13px;">${u.country ? u.country + ' ' : ''}${u.name}</div>`
-                ))
-                .addTo(map);
-              el.addEventListener('click', function(e) {
-                e.stopPropagation();
-                marker.togglePopup();
-              });
-              allMarkers.push(marker);
-            }
-          });
-        }
-
-        // 初期表示（全てON）
+        universityList = parseCSV(csv);
         showMarkersByRegion(["北米", "アジア", "ヨーロッパ", "オセアニア"]);
-
-        // チェックボックスでフィルター
-        document.querySelectorAll('.region-checkbox').forEach(cb => {
-          cb.addEventListener('change', () => {
-            const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
-            showMarkersByRegion(selected);
-          });
-        });
-
-        // 「全て表示」チェックボックスの制御
-        const allBox = document.getElementById('region-all');
-        const regionBoxes = document.querySelectorAll('.region-checkbox');
-
-        // 「全て表示」クリック時
-        allBox.addEventListener('change', () => {
-          regionBoxes.forEach(cb => cb.checked = allBox.checked);
-          const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
-          showMarkersByRegion(selected);
-        });
-
-        // 各地域チェックボックスクリック時
-        regionBoxes.forEach(cb => {
-          cb.addEventListener('change', () => {
-            const checkedCount = Array.from(regionBoxes).filter(e => e.checked).length;
-            allBox.checked = checkedCount === regionBoxes.length;
-            const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
-            showMarkersByRegion(selected);
-          });
-        });
       });
+
+    // フィルター制御
+    const allBox = document.getElementById('region-all');
+    const regionBoxes = document.querySelectorAll('.region-checkbox');
+
+    // 「全て表示」クリック時
+    allBox.addEventListener('change', () => {
+      regionBoxes.forEach(cb => cb.checked = allBox.checked);
+      const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
+      showMarkersByRegion(selected);
+    });
+
+    // 各地域チェックボックスクリック時
+    regionBoxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checkedCount = Array.from(regionBoxes).filter(e => e.checked).length;
+        allBox.checked = checkedCount === regionBoxes.length;
+        const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
+        showMarkersByRegion(selected);
+      });
+    });
+
+    // ベースマップ切替
+    document.getElementById('basemap-select').addEventListener('change', function() {
+      const val = this.value;
+      // どのベースマップでも同じ中心・ズームにする
+      map.setStyle(val === 'gsi' ? baseStyles.gsi : baseStyles.carto);
+      map.setCenter([139.9545, 35.8251]);
+      map.setZoom(1.8);
+
+      // ベースマップ切替後もマーカーを再描画
+      const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
+      map.once('style.load', () => {
+        // 麗澤大学のマーカー再描画
+        new maplibregl.Marker({
+          element: reitakuIcon,
+          anchor: 'bottom'
+        })
+          .setLngLat([139.9545, 35.8251])
+          .addTo(map);
+        showMarkersByRegion(selected);
+      });
+    });
   </script>
 </body>
 </html>
