@@ -12,7 +12,8 @@
     <label for="basemap-select" style="font-size:14px;">ベースマップ：</label>
     <select id="basemap-select">
       <option value="gsi">国土地理院</option>
-      <option value="carto" selected>CartoDB Positron</option> <!-- ← 名前を変更 -->
+      <option value="carto" selected>White</option> <!-- ← ここをWhiteに変更 -->
+      <option value="dark">Dark Matter</option>
     </select>
   </div>
   <!-- 地域の説明・フィルターUIはここから下に続く -->
@@ -75,13 +76,14 @@
           }
         ]
       },
-      carto: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+      carto: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+      dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
     };
 
     // --- 既存の初期値部分を修正 ---
     let map = new maplibregl.Map({
       container: 'map',
-      style: baseStyles.carto, // ← 初期値をCarto Positronに
+      style: baseStyles.carto, // ← 初期値をCartoDB Positronに
       center: [139.9545, 35.8251],
       zoom: 1.8
     });
@@ -181,7 +183,7 @@
     document.getElementById('basemap-select').addEventListener('change', function() {
       const val = this.value;
       // どのベースマップでも同じ中心・ズームにする
-      map.setStyle(val === 'gsi' ? baseStyles.gsi : baseStyles.carto);
+      map.setStyle(baseStyles[val]);
       map.setCenter([139.9545, 35.8251]);
       map.setZoom(1.8);
 
