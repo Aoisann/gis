@@ -82,8 +82,8 @@
     let map = new maplibregl.Map({
       container: 'map',
       style: baseStyles.carto, // ← 初期値をCartoDB Positronに
-      center: [139.9545, 35.8251],
-      zoom: 1.8
+      center: [15, 30],        // ← 世界全体が見えるように中心を少し下げる
+      zoom: 1.2                // ← 世界全体が見えるズームに変更
     });
 
     // --- 麗澤大学のマーカー ---
@@ -155,9 +155,20 @@
             plane.style.pointerEvents = 'none';
             plane.style.transition = 'none'; // JSアニメーションなのでCSSトランジションは不要
 
-            // 角度計算
-            const dx = destPoint.x - reitakuPoint.x;
-            const dy = destPoint.y - reitakuPoint.y;
+            // 角度計算（最短経路の方向にするため、地図上のピクセル座標で計算）
+            let dx = destPoint.x - reitakuPoint.x;
+            let dy = destPoint.y - reitakuPoint.y;
+
+            // 地図が世界地図（経度±180度をまたぐ場合）に対応
+            if (Math.abs(dx) > window.innerWidth / 2) {
+              // 反対側に飛ばないように、経度差が大きい場合は±360度補正
+              if (dx > 0) {
+                dx = dx - window.innerWidth;
+              } else {
+                dx = dx + window.innerWidth;
+              }
+            }
+
             const angle = Math.atan2(dy, dx) * 180 / Math.PI;
             plane.style.transform = `rotate(${angle}deg)`;
 
@@ -188,15 +199,12 @@
               // ベジェ曲線上の座標
               const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
               const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
-              // 進行方向の角度
-              const dx2 = bezier(t + 0.01, reitakuPoint.x, cx, destPoint.x) - x;
-              const dy2 = bezier(t + 0.01, reitakuPoint.y, cy, destPoint.y) - y;
-              const angle2 = Math.atan2(dy2, dx2) * 180 / Math.PI;
-              // 少し拡大・縮小で浮遊感
-              const scale = 1 + 0.15 * Math.sin(Math.PI * t);
+
+              // 進行方向の角度（ドリフト感をなくすため、最初から最後まで同じ角度にする）
               plane.style.left = `${x - 19}px`;
               plane.style.top = `${y - 19}px`;
-              plane.style.transform = `rotate(${angle2}deg) scale(${scale})`;
+              plane.style.transform = `rotate(${angle}deg) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
+
               // 影や半透明も追加
               plane.style.filter = `drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
               requestAnimationFrame(animatePlane);
@@ -225,24 +233,25 @@
 
             // 左端からスライドで現れる大学情報パネル
             let infoDiv = document.getElementById('univ-info');
+            // infoDivのスタイルを修正（右上のみ丸く、右下は角張らせる）
             if (!infoDiv) {
               infoDiv = document.createElement('div');
               infoDiv.id = 'univ-info';
               infoDiv.style.position = 'fixed';
-              infoDiv.style.top = '0';
               infoDiv.style.left = '0';
-              infoDiv.style.height = '100vh';
+              infoDiv.style.bottom = '0';
+              infoDiv.style.top = '';
+              infoDiv.style.height = '50vh';
               infoDiv.style.width = '320px';
               infoDiv.style.transform = 'translateX(-340px)';
               infoDiv.style.transition = 'transform 0.4s cubic-bezier(.77,0,.18,1)';
               infoDiv.style.zIndex = '3000';
-              // 落ち着きのある緑系に変更
-              infoDiv.style.background = 'rgba(44, 62, 80, 0.7)'; // 深いグリーン寄りのネイビー、より透明に
+              infoDiv.style.background = 'rgba(44, 62, 80, 0.7)';
               infoDiv.style.boxShadow = '2px 0 16px rgba(0,0,0,0.13)';
               infoDiv.style.padding = '32px 28px 24px 28px';
               infoDiv.style.fontSize = '16px';
-              infoDiv.style.borderTopRightRadius = '18px';
-              infoDiv.style.borderBottomRightRadius = '18px';
+              infoDiv.style.borderTopRightRadius = '18px';     // 右上だけ丸く
+              infoDiv.style.borderBottomRightRadius = '0';     // 右下は角張らせる
               infoDiv.style.display = 'flex';
               infoDiv.style.flexDirection = 'column';
               infoDiv.style.justifyContent = 'flex-start';
@@ -257,11 +266,17 @@
             }
 
             infoDiv.innerHTML =
-              `<div style="font-weight:bold;font-size:20px;margin-bottom:10px;color:#fff;text-shadow:0 2px 8px #0002;">${u.name}</div>
-               <div style="color:#e0f7fa;font-size:15px;margin-bottom:6px;">${u["english name"] ? u["english name"] : ""}</div>
-               <div style="color:#b2dfdb;font-size:14px;margin-bottom:6px;">${u.country ? u.country : ""}</div>
-               ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ? `<div style="margin-bottom:8px;"><a href="${u.URL.trim()}" target="_blank" style="color:#fff;text-decoration:underline;word-break:break-all;">大学ホームページ</a></div>` : ""}
-               <button id="close-univ-info" style="position:absolute;top:12px;right:16px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:32px;height:32px;font-size:20px;color:#fff;cursor:pointer;">×</button>`;
+              `<div style="font-weight:bold;font-size:22px;margin-bottom:14px;color:#fff;text-shadow:0 2px 8px #0002;">${u.name}</div>
+               <div style="color:#e0f7fa;font-size:17px;margin-bottom:8px;">${u["english name"] ? u["english name"] : ""}</div>
+               <div style="color:#b2dfdb;font-size:16px;margin-bottom:8px;">${u.country ? u.country : ""}</div>
+               ${u.country ? `<div style="margin-bottom:12px;"><img src="flags/${u.country.trim()}.png" alt="${u.country}" style="width:56px;height:38px;vertical-align:middle;border-radius:0;border:2px solid #fff;background:#fff;box-shadow:0 2px 8px #0002;"></div>` : ""}
+               ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ? 
+                  `<div style="margin-bottom:10px;">
+                     <a href="${u.URL.trim()}" target="_blank" style="color:#fff;text-decoration:underline;word-break:break-all;font-size:17px;">
+                       ホームページはこちらから
+                     </a>
+                   </div>` : ""}
+               <button id="close-univ-info" style="position:absolute;top:12px;right:16px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:36px;height:36px;font-size:22px;color:#fff;cursor:pointer;">×</button>`;
 
             infoDiv.style.display = "flex";
 
@@ -321,10 +336,9 @@
     // ベースマップ切替
     document.getElementById('basemap-select').addEventListener('change', function() {
       const val = this.value;
-      // どのベースマップでも同じ中心・ズームにする
       map.setStyle(baseStyles[val]);
-      map.setCenter([139.9545, 35.8251]);
-      map.setZoom(1.8);
+      map.setCenter([15, 30]);   // ← 世界全体が見える中心
+      map.setZoom(1.2);          // ← 世界全体が見えるズーム
 
       // ベースマップ切替後もマーカーを再描画
       const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
