@@ -129,22 +129,16 @@
             e.stopPropagation();
 
             // --- 飛行機アニメーションここから ---
-            // 麗澤大学の座標
             const reitakuLngLat = [139.9545, 35.8251];
-            // 目的地（選択大学）の座標
             const destLngLat = [u.lng, u.lat];
-
-            // 地図のピクセル座標に変換
             const reitakuPoint = map.project(reitakuLngLat);
             const destPoint = map.project(destLngLat);
 
-            // すでに飛行機があれば削除
             const oldPlane = document.getElementById('fly-plane');
             if (oldPlane) oldPlane.remove();
 
-            // 飛行機画像を作成
             const plane = document.createElement('img');
-            plane.src = 'plane1.png'; // ← ここをplane1.pngに変更
+            plane.src = 'plane1.png';
             plane.id = 'fly-plane';
             plane.style.position = 'fixed';
             plane.style.width = '38px';
@@ -153,39 +147,43 @@
             plane.style.top = `${reitakuPoint.y - 19}px`;
             plane.style.zIndex = 4000;
             plane.style.pointerEvents = 'none';
-            plane.style.transition = 'none'; // JSアニメーションなのでCSSトランジションは不要
+            plane.style.transition = 'none';
 
-            // 角度計算（最短経路の方向にするため、地図上のピクセル座標で計算）
+            // 角度計算
             let dx = destPoint.x - reitakuPoint.x;
             let dy = destPoint.y - reitakuPoint.y;
-
-            // 地図が世界地図（経度±180度をまたぐ場合）に対応
             if (Math.abs(dx) > window.innerWidth / 2) {
-              // 反対側に飛ばないように、経度差が大きい場合は±360度補正
-              if (dx > 0) {
-                dx = dx - window.innerWidth;
-              } else {
-                dx = dx + window.innerWidth;
-              }
+              dx = dx > 0 ? dx - window.innerWidth : dx + window.innerWidth;
             }
-
             const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            plane.style.transform = `rotate(${angle}deg)`;
+
+            // ベースマップがdarkの場合は色反転
+            let filter = '';
+            if (map.getStyle().sprite && map.getStyle().sprite.includes('dark-matter')) {
+              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+            } else if (
+              map.getStyle().sources &&
+              JSON.stringify(map.getStyle().sources).includes('dark-matter')
+            ) {
+              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+            } else if (
+              map.getStyle().name &&
+              map.getStyle().name.toLowerCase().includes('dark')
+            ) {
+              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+            }
+            plane.style.filter = filter;
 
             document.body.appendChild(plane);
 
-            // リアルなアニメーション用パラメータ
-            const duration = 1200; // ms
+            // アニメーション用パラメータ
             const frames = 60;
             let frame = 0;
-
-            // 軌道を少しカーブさせる（ベジェ曲線風）
-            const curveStrength = 0.18; // 0で直線、0.1～0.3でカーブ
+            const curveStrength = 0.18;
             const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
             const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
 
             function bezier(t, p0, p1, p2) {
-              // 2次ベジェ
               return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
             }
 
@@ -196,24 +194,19 @@
                 plane.remove();
                 return;
               }
-              // ベジェ曲線上の座標
               const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
               const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
-
-              // 進行方向の角度（ドリフト感をなくすため、最初から最後まで同じ角度にする）
               plane.style.left = `${x - 19}px`;
               plane.style.top = `${y - 19}px`;
               plane.style.transform = `rotate(${angle}deg) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
-
-              // 影や半透明も追加
-              plane.style.filter = `drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
+              // filterを上書きしないように、アニメーション用のfilterを追加
+              plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
               requestAnimationFrame(animatePlane);
             }
             animatePlane();
             // --- 飛行機アニメーションここまで ---
 
-            // ...この下に既存のピン選択処理...
-            // すべての大学ピン画像のサイズと影を元に戻す
+            // ピン画像のリセット
             document.querySelectorAll('.univ-marker-img').forEach(img => {
               img.style.width = '40px';
               img.style.height = '40px';
@@ -225,22 +218,18 @@
             el.style.width = '56px';
             el.style.height = '56px';
             el.style.zIndex = '10';
-            if (u.region === "アジア" || u.region === "オセアニア") {
-              el.style.filter = 'drop-shadow(0 0 6px #e91e63aa)'; // ピンク
-            } else {
-              el.style.filter = 'drop-shadow(0 0 6px #1976d2aa)'; // 青
-            }
+            el.style.filter = (u.region === "アジア" || u.region === "オセアニア")
+              ? 'drop-shadow(0 0 6px #e91e63aa)'
+              : 'drop-shadow(0 0 6px #1976d2aa)';
 
-            // 左端からスライドで現れる大学情報パネル
+            // 大学情報パネル
             let infoDiv = document.getElementById('univ-info');
-            // infoDivのスタイルを修正（右上のみ丸く、右下は角張らせる）
             if (!infoDiv) {
               infoDiv = document.createElement('div');
               infoDiv.id = 'univ-info';
               infoDiv.style.position = 'fixed';
               infoDiv.style.left = '0';
               infoDiv.style.bottom = '0';
-              infoDiv.style.top = '';
               infoDiv.style.height = '50vh';
               infoDiv.style.width = '320px';
               infoDiv.style.transform = 'translateX(-340px)';
@@ -250,18 +239,16 @@
               infoDiv.style.boxShadow = '2px 0 16px rgba(0,0,0,0.13)';
               infoDiv.style.padding = '32px 28px 24px 28px';
               infoDiv.style.fontSize = '16px';
-              infoDiv.style.borderTopRightRadius = '18px';     // 右上だけ丸く
-              infoDiv.style.borderBottomRightRadius = '0';     // 右下は角張らせる
+              infoDiv.style.borderTopRightRadius = '18px';
+              infoDiv.style.borderBottomRightRadius = '0';
               infoDiv.style.display = 'flex';
               infoDiv.style.flexDirection = 'column';
               infoDiv.style.justifyContent = 'flex-start';
               document.body.appendChild(infoDiv);
-              // 少し遅延してスライドイン
               setTimeout(() => {
                 infoDiv.style.transform = 'translateX(0)';
               }, 10);
             } else {
-              // すでに表示済みならスライドイン
               infoDiv.style.transform = 'translateX(0)';
             }
 
@@ -270,15 +257,45 @@
                <div style="color:#e0f7fa;font-size:17px;margin-bottom:8px;">${u["english name"] ? u["english name"] : ""}</div>
                <div style="color:#b2dfdb;font-size:16px;margin-bottom:8px;">${u.country ? u.country : ""}</div>
                ${u.country ? `<div style="margin-bottom:12px;"><img src="flags/${u.country.trim()}.png" alt="${u.country}" style="width:56px;height:38px;vertical-align:middle;border-radius:0;border:2px solid #fff;background:#fff;box-shadow:0 2px 8px #0002;"></div>` : ""}
-               ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ? 
+               <div style="color:#fff;font-size:15px;margin-bottom:8px;">
+                 主に使われる言語：${u.language ? u.language : "不明"}
+               </div>
+               ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
                   `<div style="margin-bottom:10px;">
                      <a href="${u.URL.trim()}" target="_blank" style="color:#fff;text-decoration:underline;word-break:break-all;font-size:17px;">
                        ホームページはこちらから
                      </a>
                    </div>` : ""}
+               <button id="zoom-to-univ" style="margin-bottom:12px;padding:8px 18px;background:#1976d2;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;">もっと見る</button>
                <button id="close-univ-info" style="position:absolute;top:12px;right:16px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:36px;height:36px;font-size:22px;color:#fff;cursor:pointer;">×</button>`;
 
-            infoDiv.style.display = "flex";
+            let prevCenter = map.getCenter();
+            let prevZoom = map.getZoom();
+
+            const zoomBtn = document.getElementById('zoom-to-univ');
+            zoomBtn.onclick = function() {
+              prevCenter = map.getCenter();
+              prevZoom = map.getZoom();
+              map.flyTo({
+                center: [u.lng, u.lat],
+                zoom: 13,
+                speed: 1.2,
+                curve: 1.4,
+                essential: true
+              });
+              zoomBtn.textContent = "戻る";
+              zoomBtn.onclick = function() {
+                map.flyTo({
+                  center: prevCenter,
+                  zoom: prevZoom,
+                  speed: 1.2,
+                  curve: 1.4,
+                  essential: true
+                });
+                zoomBtn.textContent = "もっと見る";
+                zoomBtn.onclick = arguments.callee; // もう一度「もっと見る」に戻す
+              };
+            };
 
             // 閉じるボタン
             document.getElementById('close-univ-info').onclick = function() {
@@ -296,13 +313,14 @@
     fetch('大学ホームページ一覧_確定版.csv')
       .then(response => response.text())
       .then(csv => {
+        // CSVパース関数を修正
         function parseCSV(csv) {
           const lines = csv.trim().split('\n');
-          const headers = lines[0].split(',');
+          const headers = lines[0].split(',').map(h => h.trim().replace(/\r/g, ""));
           return lines.slice(1).map(line => {
             const cols = line.split(',');
             const obj = {};
-            headers.forEach((h, i) => obj[h] = cols[i]);
+            headers.forEach((h, i) => obj[h] = cols[i] ? cols[i].trim() : "");
             obj.lng = parseFloat(obj["経度"]);
             obj.lat = parseFloat(obj["緯度"]);
             return obj;
