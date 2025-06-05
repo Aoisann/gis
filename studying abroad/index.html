@@ -41,9 +41,10 @@
       </label>
     </div>
     <!-- ↓ここにベースマップ選択を追加↓ -->
-    <div style="margin-top:10px;background:rgba(255,255,255,0.95);padding:6px 12px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;">
+    <div id="basemap-box" style="position:fixed;z-index:2000;top:10px;right:220px;background:rgba(255,255,255,0.95);padding:6px 12px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;">
       <label for="basemap-select" style="font-size:14px;">ベースマップ：</label>
       <select id="basemap-select">
+        <option value="original">元のマップ</option>
         <option value="gsi">国土地理院</option>
         <option value="carto" selected>White</option>
         <option value="dark">Dark Matter</option>
@@ -55,6 +56,7 @@
   <script>
     // ベースマップ定義
     const baseStyles = {
+      original: "https://tile.openstreetmap.jp/styles/osm-bright-ja/style.json",
       gsi: {
         "version": 8,
         "sources": {
