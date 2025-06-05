@@ -8,107 +8,52 @@
 </head>
 <body>
   <!-- スプラッシュ画像 -->
-  <div id="splash" style="
-    position:fixed;
-    top:0;left:0;width:100vw;height:100vh;
-    background:rgba(0,0,0,0.85);
-    z-index:99999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    transition:opacity 1.2s cubic-bezier(.77,0,.18,1), transform 1.2s cubic-bezier(.77,0,.18,1);
-  ">
+  <div id="splash" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity 1.2s cubic-bezier(.77,0,.18,1), transform 1.2s cubic-bezier(.77,0,.18,1);">
     <div style="position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;">
-      <!-- 画像本体 -->
-      <img id="splash-img" src="image2.png" style="
-        max-width:100vw;
-        max-height:100vh;
-        width:auto;
-        height:auto;
-        object-fit:contain;
-        z-index:2;
-        position:relative;
-        display:block;
-        margin:auto;
-      ">
-      <!-- 左ぼかし -->
-      <div style="
-        position:absolute;left:0;top:0;width:15vw;height:100vh;
-        background:linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 100%);
-        z-index:3;
-        pointer-events:none;
-        filter:blur(12px);
-      "></div>
-      <!-- 右ぼかし -->
-      <div style="
-        position:absolute;right:0;top:0;width:15vw;height:100vh;
-        background:linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%);
-        z-index:3;
-        pointer-events:none;
-        filter:blur(12px);
-      "></div>
+      <img id="splash-img" src="image2.png" style="max-width:100vw;max-height:100vh;width:auto;height:auto;object-fit:contain;z-index:2;position:relative;display:block;margin:auto;">
+      <div style="position:absolute;left:0;top:0;width:15vw;height:100vh;background:linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 100%);z-index:3;pointer-events:none;filter:blur(12px);"></div>
+      <div style="position:absolute;right:0;top:0;width:15vw;height:100vh;background:linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%);z-index:3;pointer-events:none;filter:blur(12px);"></div>
     </div>
   </div>
-  <!-- ここから下は既存のbody内容 ... -->
-  <!-- ベースマップ選択UI部分を修正 -->
-  <div style="position:fixed;z-index:2000;top:10px;right:10px;background:rgba(255,255,255,0.95);padding:6px 12px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;">
-    <label for="basemap-select" style="font-size:14px;">ベースマップ：</label>
-    <select id="basemap-select">
-      <option value="gsi">国土地理院</option>
-      <option value="carto" selected>White</option> <!-- ← ここをWhiteに -->
-      <option value="dark">Dark Matter</option>
-    </select>
-  </div>
-  <!-- 地域の説明・フィルターUIはここから下に続く -->
-  <div id="region-legend" style="position:fixed;z-index:1000;bottom:10px;right:10px;background:rgba(255,255,255,0.95);padding:6px 10px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;line-height:1.7;">
+  <!-- 地域フィルターとベースマップ選択を別々の四角で表示する -->
+  <!-- 地域フィルター -->
+  <div id="region-legend" style="position:fixed;z-index:2000;top:10px;right:10px;background:rgba(255,255,255,0.95);padding:6px 10px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;line-height:1.7;">
     <div style="margin-bottom:4px;font-size:14px;">地域で絞り込み：</div>
     <div id="region-filters" style="margin-bottom:6px; display: flex; flex-direction: column; gap: 8px;">
       <label style="display:flex;align-items:center;">
-        <input type="checkbox" id="region-all" checked style="margin-right:4px;">
-        全て表示
+        <input type="checkbox" id="region-all" checked style="margin-right:4px;">全て表示
       </label>
       <label style="display:flex;align-items:center; margin-top:2px;">
         <input type="checkbox" class="region-checkbox" value="北米" checked style="margin-right:4px;">
-        <img src="R-blue.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">
-        北米
+        <img src="R-blue.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">北米
       </label>
       <label style="display:flex;align-items:center; margin-top:2px;">
         <input type="checkbox" class="region-checkbox" value="アジア" checked style="margin-right:4px;">
-        <img src="R-purple.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">
-        アジア
+        <img src="R-purple.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">アジア
       </label>
       <label style="display:flex;align-items:center; margin-top:2px;">
         <input type="checkbox" class="region-checkbox" value="ヨーロッパ" checked style="margin-right:4px;">
-        <img src="R-blue2.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">
-        ヨーロッパ
+        <img src="R-blue2.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">ヨーロッパ
       </label>
       <label style="display:flex;align-items:center; margin-top:2px;">
         <input type="checkbox" class="region-checkbox" value="オセアニア" checked style="margin-right:4px;">
-        <img src="R-orenge.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">
-        オセアニア
+        <img src="R-orenge.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">オセアニア
       </label>
+    </div>
+    <!-- ↓ここにベースマップ選択を追加↓ -->
+    <div style="margin-top:10px;background:rgba(255,255,255,0.95);padding:6px 12px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;">
+      <label for="basemap-select" style="font-size:14px;">ベースマップ：</label>
+      <select id="basemap-select">
+        <option value="gsi">国土地理院</option>
+        <option value="carto" selected>White</option>
+        <option value="dark">Dark Matter</option>
+      </select>
     </div>
   </div>
   <div id="map"></div>
-
-  <!-- 既存body直下に追加（スプラッシュ画像の下、ベースマップ選択UIの上など） -->
-  <!-- 検索ボックス部分を修正 -->
-  <div id="univ-search-toggle" style="position:fixed;top:16px;left:16px;z-index:2101;">
-    <button id="univ-search-open-btn" style="padding:7px 18px;background:#1976d2;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;box-shadow:0 2px 8px #0002;">名前で検索</button>
-  </div>
-  <div id="univ-search-box" style="position:fixed;top:16px;left:16px;z-index:2100;background:rgba(255,255,255,0.97);padding:12px 16px 10px 16px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.13);width:320px;display:none;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <span style="font-weight:bold;">大学検索</span>
-      <button id="univ-search-close-btn" style="background:none;border:none;font-size:22px;line-height:1;color:#888;cursor:pointer;">×</button>
-    </div>
-    <input id="univ-search-input" type="text" placeholder="大学名で検索" style="width:100%;padding:7px 10px;font-size:16px;border-radius:6px;border:1px solid #bbb;margin-bottom:8px;">
-    <div id="univ-search-list" style="max-height:220px;overflow-y:auto;font-size:15px;"></div>
-  </div>
-
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
   <script>
-    // ベースマップスタイル定義
+    // ベースマップ定義
     const baseStyles = {
       gsi: {
         "version": 8,
@@ -136,29 +81,24 @@
       dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
     };
 
-    // --- 既存の初期値部分を修正 ---
+    // 地図初期化
     let map = new maplibregl.Map({
       container: 'map',
-      style: baseStyles.carto, // ← 初期値をCartoDB Positronに
-      center: [15, 30],        // ← 世界全体が見えるように中心を少し下げる
-      zoom: 1.2                // ← 世界全体が見えるズームに変更
+      style: baseStyles.carto,
+      center: [15, 30],
+      zoom: 1.2
     });
 
-    // --- 麗澤大学のマーカー ---
+    // 麗澤大学マーカー
     const reitakuIcon = document.createElement('img');
     reitakuIcon.src = 'R透過.png';
     reitakuIcon.style.width = '52px';
     reitakuIcon.style.height = '52px';
-    new maplibregl.Marker({
-        element: reitakuIcon,
-        anchor: 'bottom'
-    })
+    new maplibregl.Marker({ element: reitakuIcon, anchor: 'bottom' })
       .setLngLat([139.9545, 35.8251])
       .addTo(map);
 
-    // --- 大学ピン表示 ---
-    let allMarkers = [];
-    let universityList = [];
+    // 地域アイコン
     const regionIcon = {
       "北米": "R-blue.png",
       "アジア": "R-purple.png",
@@ -166,205 +106,213 @@
       "オセアニア": "R-orenge.png"
     };
 
-    // ピンを地図に追加する関数
+    let allMarkers = [];
+    let universityList = [];
+
+    // 地域選択取得
+    function getSelectedRegions() {
+      return Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
+    }
+
+    // ピン表示
     function showMarkersByRegion(selectedRegions) {
-      // 既存マーカーを全て削除
       allMarkers.forEach(m => m.remove());
       allMarkers = [];
       universityList.forEach(u => {
-        if (selectedRegions.includes(u.region)) {
-          let el = document.createElement('img');
-          el.src = regionIcon[u.region];
-          el.style.width = '40px';
-          el.style.height = '40px';
-          el.style.background = 'transparent';
-          el.style.cursor = 'pointer';
-          // ポップアップを削除
-          const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
-            .setLngLat([u.lng, u.lat])
-            .addTo(map);
-          el.addEventListener('click', function(e) {
-            e.stopPropagation();
+        if (!selectedRegions.includes(u.region)) return;
+        let el = document.createElement('img');
+        el.src = regionIcon[u.region];
+        el.style.width = '40px';
+        el.style.height = '40px';
+        el.style.background = 'transparent';
+        el.style.cursor = 'pointer';
+        const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([u.lng, u.lat])
+          .addTo(map);
+        el.classList.add('univ-marker-img');
+        el.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // --- 飛行機アニメーション ---
+          const reitakuLngLat = [139.9545, 35.8251];
+          const destLngLat = [u.lng, u.lat];
+          const reitakuPoint = map.project(reitakuLngLat);
+          const destPoint = map.project(destLngLat);
+          const oldPlane = document.getElementById('fly-plane');
+          if (oldPlane) oldPlane.remove();
+          const plane = document.createElement('img');
+          plane.src = 'plane1.png';
+          plane.id = 'fly-plane';
+          plane.style.position = 'fixed';
+          plane.style.width = '38px';
+          plane.style.height = '38px';
+          plane.style.left = `${reitakuPoint.x - 19}px`;
+          plane.style.top = `${reitakuPoint.y - 19}px`;
+          plane.style.zIndex = 4000;
+          plane.style.pointerEvents = 'none';
+          plane.style.transition = 'none';
+          let dx = destPoint.x - reitakuPoint.x;
+          let dy = destPoint.y - reitakuPoint.y;
+          if (Math.abs(dx) > window.innerWidth / 2) {
+            dx = dx > 0 ? dx - window.innerWidth : dx + window.innerWidth;
+          }
+          // --- 飛行機アニメーション部分のみ修正 ---
+          const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+          let filter = '';
+          if (map.getStyle().sprite && map.getStyle().sprite.includes('dark-matter')) {
+            filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+          } else if (
+            map.getStyle().sources &&
+            JSON.stringify(map.getStyle().sources).includes('dark-matter')
+          ) {
+            filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+          } else if (
+            map.getStyle().name &&
+            map.getStyle().name.toLowerCase().includes('dark')
+          ) {
+            filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+          }
+          plane.style.filter = filter;
 
-            // --- 飛行機アニメーションここから ---
-            const reitakuLngLat = [139.9545, 35.8251];
-            const destLngLat = [u.lng, u.lat];
-            const reitakuPoint = map.project(reitakuLngLat);
-            const destPoint = map.project(destLngLat);
+          // ★北米の場合は上下反転（scaleY(-1)をrotateの前に必ず指定）
+          if (u.region === "北米") {
+            plane.style.transform = `rotate(${angle}deg) scaleY(-1)`;
+          } else {
+            plane.style.transform = `rotate(${angle}deg)`;
+          }
 
-            const oldPlane = document.getElementById('fly-plane');
-            if (oldPlane) oldPlane.remove();
-
-            const plane = document.createElement('img');
-            plane.src = 'plane1.png';
-            plane.id = 'fly-plane';
-            plane.style.position = 'fixed';
-            plane.style.width = '38px';
-            plane.style.height = '38px';
-            plane.style.left = `${reitakuPoint.x - 19}px`;
-            plane.style.top = `${reitakuPoint.y - 19}px`;
-            plane.style.zIndex = 4000;
-            plane.style.pointerEvents = 'none';
-            plane.style.transition = 'none';
-
-            // 角度計算
-            let dx = destPoint.x - reitakuPoint.x;
-            let dy = destPoint.y - reitakuPoint.y;
-            if (Math.abs(dx) > window.innerWidth / 2) {
-              dx = dx > 0 ? dx - window.innerWidth : dx + window.innerWidth;
+          document.body.appendChild(plane);
+          const frames = 60;
+          let frame = 0;
+          const curveStrength = 0.18;
+          const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
+          const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
+          function bezier(t, p0, p1, p2) {
+            return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
+          }
+          function animatePlane() {
+            frame++;
+            const t = frame / frames;
+            if (t > 1) {
+              plane.remove();
+              return;
             }
-            // 飛行機画像の上が進行方向になるように、90度ずらす
-            const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-
-            // ベースマップがdarkの場合は色反転
-            let filter = '';
-            if (map.getStyle().sprite && map.getStyle().sprite.includes('dark-matter')) {
-              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
-            } else if (
-              map.getStyle().sources &&
-              JSON.stringify(map.getStyle().sources).includes('dark-matter')
-            ) {
-              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
-            } else if (
-              map.getStyle().name &&
-              map.getStyle().name.toLowerCase().includes('dark')
-            ) {
-              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
-            }
-            plane.style.filter = filter;
-
-            document.body.appendChild(plane);
-
-            // アニメーション用パラメータ
-            const frames = 60;
-            let frame = 0;
-            const curveStrength = 0.18;
-            const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
-            const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
-
-            function bezier(t, p0, p1, p2) {
-              return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
-            }
-
-            function animatePlane() {
-              frame++;
-              const t = frame / frames;
-              if (t > 1) {
-                plane.remove();
-                return;
-              }
-              const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
-              const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
-              plane.style.left = `${x - 19}px`;
-              plane.style.top = `${y - 19}px`;
-              plane.style.transform = `rotate(${angle}deg) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
-              // filterを上書きしないように、アニメーション用のfilterを追加
-              plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
-              requestAnimationFrame(animatePlane);
-            }
-            animatePlane();
-            // --- 飛行機アニメーションここまで ---
-
-            // ピン画像のリセット
-            document.querySelectorAll('.univ-marker-img').forEach(img => {
-              img.style.width = '40px';
-              img.style.height = '40px';
-              img.style.zIndex = '';
-              img.style.filter = '';
-            });
-
-            // この大学ピン画像だけ大きくし、地域ごとに影の色を変える
-            el.style.width = '56px';
-            el.style.height = '56px';
-            el.style.zIndex = '10';
-            el.style.filter = (u.region === "アジア" || u.region === "オセアニア")
-              ? 'drop-shadow(0 0 6px #e91e63aa)'
-              : 'drop-shadow(0 0 6px #1976d2aa)';
-
-            // 大学情報パネル
-            let infoDiv = document.getElementById('univ-info');
-            if (!infoDiv) {
-              infoDiv = document.createElement('div');
-              infoDiv.id = 'univ-info';
-              infoDiv.style.position = 'fixed';
-              infoDiv.style.left = '0';
-              infoDiv.style.bottom = '0';
-              infoDiv.style.height = '50vh';
-              infoDiv.style.width = '320px';
-              infoDiv.style.transform = 'translateX(-340px)';
-              infoDiv.style.transition = 'transform 0.4s cubic-bezier(.77,0,.18,1)';
-              infoDiv.style.zIndex = '3000';
-              infoDiv.style.background = 'rgba(44, 62, 80, 0.7)';
-              infoDiv.style.boxShadow = '2px 0 16px rgba(0,0,0,0.13)';
-              infoDiv.style.padding = '32px 28px 24px 28px';
-              infoDiv.style.fontSize = '16px';
-              infoDiv.style.borderTopRightRadius = '18px';
-              infoDiv.style.borderBottomRightRadius = '0';
-              infoDiv.style.display = 'flex';
-              infoDiv.style.flexDirection = 'column';
-              infoDiv.style.justifyContent = 'flex-start';
-              document.body.appendChild(infoDiv);
-              setTimeout(() => {
-                infoDiv.style.transform = 'translateX(0)';
-              }, 10);
+            const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
+            const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
+            plane.style.left = `${x - 19}px`;
+            plane.style.top = `${y - 19}px`;
+            // ★アニメーション中も北米だけ上下反転（scaleY(-1)をrotateの後ろにしないこと！）
+            if (u.region === "北米") {
+              plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
             } else {
-              infoDiv.style.transform = 'translateX(0)';
+              plane.style.transform = `rotate(${angle}deg) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
             }
-
-            infoDiv.innerHTML =
-              `<div style="font-weight:bold;font-size:22px;margin-bottom:14px;color:#fff;text-shadow:0 2px 8px #0002;">${u.name}</div>
-               <div style="color:#e0f7fa;font-size:17px;margin-bottom:8px;">${u["english name"] ? u["english name"] : ""}</div>
-               <div style="color:#b2dfdb;font-size:16px;margin-bottom:8px;">${u.country ? u.country : ""}</div>
-               ${u.country ? `<div style="margin-bottom:12px;"><img src="flags/${u.country.trim()}.png" alt="${u.country}" style="width:56px;height:38px;vertical-align:middle;border-radius:0;border:2px solid #fff;background:#fff;box-shadow:0 2px 8px #0002;"></div>` : ""}
-               <div style="color:#fff;font-size:15px;margin-bottom:8px;">
-                 主に使われる言語：${u.language ? u.language : "不明"}
-               </div>
-               ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
-                  `<div style="margin-bottom:10px;">
-                     <a href="${u.URL.trim()}" target="_blank" style="color:#fff;text-decoration:underline;word-break:break-all;font-size:17px;">
-                       ホームページはこちらから
-                     </a>
-                   </div>` : ""}
-               <button id="zoom-to-univ" style="margin-bottom:12px;padding:8px 18px;background:#1976d2;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;">もっと見る</button>
-               <button id="close-univ-info" style="position:absolute;top:12px;right:16px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:36px;height:36px;font-size:22px;color:#fff;cursor:pointer;">×</button>`;
-
-            let prevCenter = map.getCenter();
-            let prevZoom = map.getZoom();
-
-            const zoomBtn = document.getElementById('zoom-to-univ');
+            plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
+            requestAnimationFrame(animatePlane);
+          }
+          animatePlane();
+          // ピン画像リセット
+          document.querySelectorAll('.univ-marker-img').forEach(img => {
+            img.style.width = '40px';
+            img.style.height = '40px';
+            img.style.zIndex = '';
+            img.style.filter = '';
+          });
+          // この大学ピンだけ大きく
+          el.style.width = '56px';
+          el.style.height = '56px';
+          el.style.zIndex = '10';
+          el.style.filter = (u.region === "アジア" || u.region === "オセアニア")
+            ? 'drop-shadow(0 0 6px #e91e63aa)'
+            : 'drop-shadow(0 0 6px #1976d2aa)';
+          // 大学情報パネル
+          let infoDiv = document.getElementById('univ-info');
+          if (!infoDiv) {
+            infoDiv = document.createElement('div');
+            infoDiv.id = 'univ-info';
+            infoDiv.style.position = 'fixed';
+            infoDiv.style.left = '0';
+            infoDiv.style.bottom = '0';
+            infoDiv.style.height = '50vh';
+            infoDiv.style.width = '320px';
+            infoDiv.style.transform = 'translateX(-340px)';
+            infoDiv.style.transition = 'transform 0.4s cubic-bezier(.77,0,.18,1)';
+            infoDiv.style.zIndex = '3000';
+            infoDiv.style.background = 'rgba(44, 62, 80, 0.7)';
+            infoDiv.style.boxShadow = '2px 0 16px rgba(0,0,0,0.13)';
+            infoDiv.style.padding = '32px 28px 24px 28px';
+            infoDiv.style.fontSize = '16px';
+            infoDiv.style.borderTopRightRadius = '18px';
+            infoDiv.style.display = 'flex';
+            infoDiv.style.flexDirection = 'column';
+            infoDiv.style.justifyContent = 'flex-start';
+            document.body.appendChild(infoDiv);
+            setTimeout(() => {
+              infoDiv.style.transform = 'translateX(0)';
+            }, 10);
+          } else {
+            infoDiv.style.transform = 'translateX(0)';
+          }
+          infoDiv.innerHTML =
+            `<div style="font-weight:bold;font-size:22px;margin-bottom:14px;color:#fff;text-shadow:0 2px 8px #0002;">${u.name}</div>
+             <div style="color:#e0f7fa;font-size:17px;margin-bottom:8px;">${u["english name"] ? u["english name"] : ""}</div>
+             <div style="color:#b2dfdb;font-size:16px;margin-bottom:8px;">${u.country ? u.country : ""}</div>
+             ${u.country ? `<div style="margin-bottom:12px;"><img src="flags/${u.country.trim()}.png" alt="${u.country}" style="width:56px;height:38px;vertical-align:middle;border-radius:0;border:2px solid #fff;background:#fff;box-shadow:0 2px 8px #0002;"></div>` : ""}
+             <div style="color:#fff;font-size:15px;margin-bottom:8px;">
+               主に使われる言語：${u.language ? u.language : "不明"}
+             </div>
+             ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
+                `<div style="margin-bottom:10px;">
+                   <a href="${u.URL.trim()}" target="_blank" style="color:#fff;text-decoration:underline;word-break:break-all;font-size:17px;">
+                     ホームページはこちらから
+                   </a>
+                 </div>` : ""}
+             <button id="zoom-to-univ" style="margin-bottom:12px;padding:8px 18px;background:#1976d2;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;">もっと見る</button>
+             <button id="close-univ-info" style="position:absolute;top:12px;right:16px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:36px;height:36px;font-size:22px;color:#fff;cursor:pointer;">×</button>`;
+          let prevCenter = map.getCenter();
+          let prevZoom = map.getZoom();
+          const zoomBtn = document.getElementById('zoom-to-univ');
+          zoomBtn.onclick = function() {
+            prevCenter = map.getCenter();
+            prevZoom = map.getZoom();
+            map.flyTo({
+              center: [u.lng, u.lat],
+              zoom: 13,
+              speed: 1.2,
+              curve: 1.4,
+              essential: true
+            });
+            zoomBtn.textContent = "戻る";
             zoomBtn.onclick = function() {
-              prevCenter = map.getCenter();
-              prevZoom = map.getZoom();
               map.flyTo({
-                center: [u.lng, u.lat],
-                zoom: 13,
+                center: prevCenter,
+                zoom: prevZoom,
                 speed: 1.2,
                 curve: 1.4,
                 essential: true
               });
-              zoomBtn.textContent = "戻る";
-              zoomBtn.onclick = function() {
-                map.flyTo({
-                  center: prevCenter,
-                  zoom: prevZoom,
-                  speed: 1.2,
-                  curve: 1.4,
-                  essential: true
-                });
-                zoomBtn.textContent = "もっと見る";
-                zoomBtn.onclick = arguments.callee; // もう一度「もっと見る」に戻す
-              };
+              zoomBtn.textContent = "もっと見る";
+              zoomBtn.onclick = arguments.callee;
             };
+          };
+          document.getElementById('close-univ-info').onclick = function() {
+            infoDiv.style.transform = 'translateX(-340px)';
+          };
+        });
+        allMarkers.push(marker);
+      });
+    }
 
-            // 閉じるボタン
-            document.getElementById('close-univ-info').onclick = function() {
-              infoDiv.style.transform = 'translateX(-340px)';
-            };
-          });
-          // マーカー画像生成時にクラスを付与
-          el.classList.add('univ-marker-img');
-          allMarkers.push(marker);
-        }
+    // CSVパース
+    function parseCSV(csv) {
+      const [header, ...lines] = csv.trim().split('\n');
+      const headers = header.split(',').map(h => h.trim().replace(/\r/g, ""));
+      return lines.map(line => {
+        const cols = line.split(',');
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = cols[i] ? cols[i].trim() : "");
+        obj.lng = parseFloat(obj["経度"]);
+        obj.lat = parseFloat(obj["緯度"]);
+        return obj;
       });
     }
 
@@ -372,42 +320,21 @@
     fetch('大学ホームページ一覧_確定版.csv')
       .then(response => response.text())
       .then(csv => {
-        // CSVパース関数を修正
-        function parseCSV(csv) {
-          const lines = csv.trim().split('\n');
-          const headers = lines[0].split(',').map(h => h.trim().replace(/\r/g, ""));
-          return lines.slice(1).map(line => {
-            const cols = line.split(',');
-            const obj = {};
-            headers.forEach((h, i) => obj[h] = cols[i] ? cols[i].trim() : "");
-            obj.lng = parseFloat(obj["経度"]);
-            obj.lat = parseFloat(obj["緯度"]);
-            return obj;
-          });
-        }
         universityList = parseCSV(csv);
         showMarkersByRegion(["北米", "アジア", "ヨーロッパ", "オセアニア"]);
-        updateUnivSearchList();
       });
 
-    // フィルター制御
+    // 地域フィルター制御
     const allBox = document.getElementById('region-all');
     const regionBoxes = document.querySelectorAll('.region-checkbox');
-
-    // 「全て表示」クリック時
     allBox.addEventListener('change', () => {
       regionBoxes.forEach(cb => cb.checked = allBox.checked);
-      const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
-      showMarkersByRegion(selected);
+      showMarkersByRegion(getSelectedRegions());
     });
-
-    // 各地域チェックボックスクリック時
     regionBoxes.forEach(cb => {
       cb.addEventListener('change', () => {
-        const checkedCount = Array.from(regionBoxes).filter(e => e.checked).length;
-        allBox.checked = checkedCount === regionBoxes.length;
-        const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
-        showMarkersByRegion(selected);
+        allBox.checked = Array.from(regionBoxes).every(e => e.checked);
+        showMarkersByRegion(getSelectedRegions());
       });
     });
 
@@ -415,24 +342,17 @@
     document.getElementById('basemap-select').addEventListener('change', function() {
       const val = this.value;
       map.setStyle(baseStyles[val]);
-      map.setCenter([15, 30]);   // ← 世界全体が見える中心
-      map.setZoom(1.2);          // ← 世界全体が見えるズーム
-
-      // ベースマップ切替後もマーカーを再描画
-      const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
+      map.setCenter([15, 30]);
+      map.setZoom(1.2);
       map.once('style.load', () => {
-        // 麗澤大学のマーカー再描画
-        new maplibregl.Marker({
-          element: reitakuIcon,
-          anchor: 'bottom'
-        })
+        new maplibregl.Marker({ element: reitakuIcon, anchor: 'bottom' })
           .setLngLat([139.9545, 35.8251])
           .addTo(map);
-        showMarkersByRegion(selected);
+        showMarkersByRegion(getSelectedRegions());
       });
     });
 
-    // スプラッシュ画像を2秒後に左へフェードアウト
+    // スプラッシュ画像フェードアウト
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         const splash = document.getElementById('splash');
@@ -440,80 +360,10 @@
           splash.style.transition = 'opacity 1.2s cubic-bezier(.77,0,.18,1), transform 1.2s cubic-bezier(.77,0,.18,1)';
           splash.style.opacity = '0';
           splash.style.transform = 'translateX(-100vw)';
-          setTimeout(() => {
-            splash.remove();
-          }, 1200);
+          setTimeout(() => splash.remove(), 1200);
         }
       }, 2000);
     });
-
-    // 検索UIの生成・イベント
-    let univSearchList = [];
-    function updateUnivSearchList(keyword = "") {
-      const listDiv = document.getElementById('univ-search-list');
-      if (!universityList.length) {
-        listDiv.innerHTML = '<div style="color:#888;">データ読み込み中...</div>';
-        return;
-      }
-      const filtered = universityList.filter(u =>
-        u.name && u.name.includes(keyword)
-      );
-      if (!filtered.length) {
-        listDiv.innerHTML = '<div style="color:#888;">該当なし</div>';
-        return;
-      }
-      listDiv.innerHTML = filtered.map(u =>
-        `<div class="univ-search-item" data-name="${u.name}" style="padding:5px 0;cursor:pointer;border-bottom:1px solid #eee;">
-    <span style="color:#1976d2;font-weight:bold;">${u.name}</span>
-    <span style="color:#888;font-size:13px;margin-left:6px;">${u["english name"] ? u["english name"] : ""}</span>
-  </div>`
-      ).join('');
-      // クリックで該当マーカーを強調＆パネル表示
-      document.querySelectorAll('.univ-search-item').forEach(item => {
-        item.onclick = function() {
-          const name = this.getAttribute('data-name');
-          const u = universityList.find(x => x.name === name);
-          if (!u) return;
-          // 地域フィルターに該当しない場合は一時的に表示
-          if (!document.querySelector('.region-checkbox[value="' + u.region + '"]').checked) {
-            document.querySelector('.region-checkbox[value="' + u.region + '"]').checked = true;
-            const selected = Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
-            showMarkersByRegion(selected);
-          }
-          // マーカーを探してクリックイベントを発火
-          setTimeout(() => {
-            // 各マーカーimgにu.lng, u.latをdata属性で持たせておくとより確実ですが、現状のままlngで判定
-            const markerImg = Array.from(document.querySelectorAll('.univ-marker-img')).find(img => {
-              const markerLng = img.parentElement && img.parentElement._lngLat ? img.parentElement._lngLat.lng : null;
-              const markerLat = img.parentElement && img.parentElement._lngLat ? img.parentElement._lngLat.lat : null;
-              return Math.abs(markerLng - u.lng) < 0.0001 && Math.abs(markerLat - u.lat) < 0.0001;
-            });
-            if (markerImg) {
-              markerImg.click();
-              // 検索パネルを自動で閉じる場合は下記を有効化
-              // document.getElementById('univ-search-box').style.display = 'none';
-              // document.getElementById('univ-search-open-btn').style.display = 'inline-block';
-            }
-          }, 100);
-        };
-      });
-    }
-
-    // 検索ボックス入力イベント
-    document.getElementById('univ-search-input').addEventListener('input', function() {
-      const keyword = this.value.trim();
-      updateUnivSearchList(keyword);
-    });
-
-    // 開閉ボタンの制御
-    document.getElementById('univ-search-open-btn').onclick = function() {
-      document.getElementById('univ-search-box').style.display = 'block';
-      this.style.display = 'none';
-    };
-    document.getElementById('univ-search-close-btn').onclick = function() {
-      document.getElementById('univ-search-box').style.display = 'none';
-      document.getElementById('univ-search-open-btn').style.display = 'inline-block';
-    };
   </script>
 </body>
 </html>
