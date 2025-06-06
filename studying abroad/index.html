@@ -15,7 +15,6 @@
       <div style="position:absolute;right:0;top:0;width:15vw;height:100vh;background:linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%);z-index:3;pointer-events:none;filter:blur(12px);"></div>
     </div>
   </div>
-  <!-- 地域フィルターとベースマップ選択を別々の四角で表示する -->
   <!-- 地域フィルター -->
   <div id="region-legend" style="position:fixed;z-index:2000;top:10px;right:10px;background:rgba(255,255,255,0.95);padding:6px 10px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;line-height:1.7;">
     <div style="margin-bottom:4px;font-size:14px;">地域で絞り込み：</div>
@@ -39,13 +38,16 @@
         <input type="checkbox" class="region-checkbox" value="オセアニア" checked style="margin-right:4px;">
         <img src="R-orenge.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">オセアニア
       </label>
+      <!-- 地域フィルターにReitaku Universityを追加 -->
+      <label style="display:flex;align-items:center; margin-top:2px;">
+        <input type="checkbox" class="region-checkbox" value="Reitaku University" checked style="margin-right:4px;">
+        <img src="R透過.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">Reitaku University
+      </label>
     </div>
-    <!-- ↓ここにベースマップ選択を追加↓ -->
+    <!-- ベースマップ選択 -->
     <div id="basemap-box" style="position:fixed;z-index:2000;top:10px;right:220px;background:rgba(255,255,255,0.95);padding:6px 12px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;">
       <label for="basemap-select" style="font-size:14px;">ベースマップ：</label>
       <select id="basemap-select">
-        <option value="original">元のマップ</option>
-        <option value="gsi">国土地理院</option>
         <option value="carto" selected>White</option>
         <option value="dark">Dark Matter</option>
       </select>
@@ -56,29 +58,6 @@
   <script>
     // ベースマップ定義
     const baseStyles = {
-      original: "https://tile.openstreetmap.jp/styles/osm-bright-ja/style.json",
-      gsi: {
-        "version": 8,
-        "sources": {
-          "gsi-std": {
-            "type": "raster",
-            "tiles": [
-              "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"
-            ],
-            "tileSize": 256,
-            "attribution": "© 国土地理院"
-          }
-        },
-        "layers": [
-          {
-            "id": "gsi-std-layer",
-            "type": "raster",
-            "source": "gsi-std",
-            "minzoom": 0,
-            "maxzoom": 18
-          }
-        ]
-      },
       carto: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
       dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
     };
@@ -91,21 +70,13 @@
       zoom: 1.2
     });
 
-    // 麗澤大学マーカー
-    const reitakuIcon = document.createElement('img');
-    reitakuIcon.src = 'R透過.png';
-    reitakuIcon.style.width = '52px';
-    reitakuIcon.style.height = '52px';
-    new maplibregl.Marker({ element: reitakuIcon, anchor: 'bottom' })
-      .setLngLat([139.9545, 35.8251])
-      .addTo(map);
-
     // 地域アイコン
     const regionIcon = {
       "北米": "R-blue.png",
       "アジア": "R-purple.png",
       "ヨーロッパ": "R-blue2.png",
-      "オセアニア": "R-orenge.png"
+      "オセアニア": "R-orenge.png",
+      "Reitaku University": "R透過.png"
     };
 
     let allMarkers = [];
@@ -134,84 +105,85 @@
         el.classList.add('univ-marker-img');
         el.addEventListener('click', function(e) {
           e.stopPropagation();
-          // --- 飛行機アニメーション ---
-          const reitakuLngLat = [139.9545, 35.8251];
-          const destLngLat = [u.lng, u.lat];
-          const reitakuPoint = map.project(reitakuLngLat);
-          const destPoint = map.project(destLngLat);
-          const oldPlane = document.getElementById('fly-plane');
-          if (oldPlane) oldPlane.remove();
-          const plane = document.createElement('img');
-          plane.src = 'plane1.png';
-          plane.id = 'fly-plane';
-          plane.style.position = 'fixed';
-          plane.style.width = '38px';
-          plane.style.height = '38px';
-          plane.style.left = `${reitakuPoint.x - 19}px`;
-          plane.style.top = `${reitakuPoint.y - 19}px`;
-          plane.style.zIndex = 4000;
-          plane.style.pointerEvents = 'none';
-          plane.style.transition = 'none';
-          let dx = destPoint.x - reitakuPoint.x;
-          let dy = destPoint.y - reitakuPoint.y;
-          if (Math.abs(dx) > window.innerWidth / 2) {
-            dx = dx > 0 ? dx - window.innerWidth : dx + window.innerWidth;
-          }
-          // --- 飛行機アニメーション部分のみ修正 ---
-          const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-          let filter = '';
-          if (map.getStyle().sprite && map.getStyle().sprite.includes('dark-matter')) {
-            filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
-          } else if (
-            map.getStyle().sources &&
-            JSON.stringify(map.getStyle().sources).includes('dark-matter')
-          ) {
-            filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
-          } else if (
-            map.getStyle().name &&
-            map.getStyle().name.toLowerCase().includes('dark')
-          ) {
-            filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
-          }
-          plane.style.filter = filter;
 
-          // ★北米の場合は上下反転（scaleY(-1)をrotateの前に必ず指定）
-          if (u.region === "北米") {
-            plane.style.transform = `rotate(${angle}deg) scaleY(-1)`;
-          } else {
-            plane.style.transform = `rotate(${angle}deg)`;
-          }
-
-          document.body.appendChild(plane);
-          const frames = 60;
-          let frame = 0;
-          const curveStrength = 0.18;
-          const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
-          const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
-          function bezier(t, p0, p1, p2) {
-            return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
-          }
-          function animatePlane() {
-            frame++;
-            const t = frame / frames;
-            if (t > 1) {
-              plane.remove();
-              return;
+          // --- 飛行機アニメーション（麗澤大学以外のみ） ---
+          if (u.region !== "Reitaku University") {
+            const reitakuLngLat = [139.9545, 35.8251];
+            const destLngLat = [u.lng, u.lat];
+            const reitakuPoint = map.project(reitakuLngLat);
+            const destPoint = map.project(destLngLat);
+            const oldPlane = document.getElementById('fly-plane');
+            if (oldPlane) oldPlane.remove();
+            const plane = document.createElement('img');
+            plane.src = 'plane1.png';
+            plane.id = 'fly-plane';
+            plane.style.position = 'fixed';
+            plane.style.width = '38px';
+            plane.style.height = '38px';
+            plane.style.left = `${reitakuPoint.x - 19}px`;
+            plane.style.top = `${reitakuPoint.y - 19}px`;
+            plane.style.zIndex = 4000;
+            plane.style.pointerEvents = 'none';
+            plane.style.transition = 'none';
+            let dx = destPoint.x - reitakuPoint.x;
+            let dy = destPoint.y - reitakuPoint.y;
+            if (Math.abs(dx) > window.innerWidth / 2) {
+              dx = dx > 0 ? dx - window.innerWidth : dx + window.innerWidth;
             }
-            const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
-            const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
-            plane.style.left = `${x - 19}px`;
-            plane.style.top = `${y - 19}px`;
-            // ★アニメーション中も北米だけ上下反転（scaleY(-1)をrotateの後ろにしないこと！）
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+            let filter = '';
+            if (map.getStyle().sprite && map.getStyle().sprite.includes('dark-matter')) {
+              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+            } else if (
+              map.getStyle().sources &&
+              JSON.stringify(map.getStyle().sources).includes('dark-matter')
+            ) {
+              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+            } else if (
+              map.getStyle().name &&
+              map.getStyle().name.toLowerCase().includes('dark')
+            ) {
+              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+            }
+            plane.style.filter = filter;
+            // 北米の場合は上下反転
             if (u.region === "北米") {
-              plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
+              plane.style.transform = `rotate(${angle}deg) scaleY(-1)`;
             } else {
-              plane.style.transform = `rotate(${angle}deg) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
+              plane.style.transform = `rotate(${angle}deg)`;
             }
-            plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
-            requestAnimationFrame(animatePlane);
+            document.body.appendChild(plane);
+            const frames = 60;
+            let frame = 0;
+            const curveStrength = 0.18;
+            const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
+            const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
+            function bezier(t, p0, p1, p2) {
+              return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
+            }
+            function animatePlane() {
+              frame++;
+              const t = frame / frames;
+              if (t > 1) {
+                plane.remove();
+                return;
+              }
+              const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
+              const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
+              plane.style.left = `${x - 19}px`;
+              plane.style.top = `${y - 19}px`;
+              if (u.region === "北米") {
+                plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
+              } else {
+                plane.style.transform = `rotate(${angle}deg) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
+              }
+              plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
+              requestAnimationFrame(animatePlane);
+            }
+            animatePlane();
           }
-          animatePlane();
+          // --- ここまで飛行機アニメーション ---
+
           // ピン画像リセット
           document.querySelectorAll('.univ-marker-img').forEach(img => {
             img.style.width = '40px';
@@ -256,11 +228,11 @@
           }
           infoDiv.innerHTML =
             `<div style="font-weight:bold;font-size:22px;margin-bottom:14px;color:#fff;text-shadow:0 2px 8px #0002;">${u.name}</div>
-             <div style="color:#e0f7fa;font-size:17px;margin-bottom:8px;">${u["english name"] ? u["english name"] : ""}</div>
-             <div style="color:#b2dfdb;font-size:16px;margin-bottom:8px;">${u.country ? u.country : ""}</div>
+             <div style="color:#e0f7fa;font-size:17px;margin-bottom:8px;">${u["english name"]||""}</div>
+             <div style="color:#b2dfdb;font-size:16px;margin-bottom:8px;">${u.country||""}</div>
              ${u.country ? `<div style="margin-bottom:12px;"><img src="flags/${u.country.trim()}.png" alt="${u.country}" style="width:56px;height:38px;vertical-align:middle;border-radius:0;border:2px solid #fff;background:#fff;box-shadow:0 2px 8px #0002;"></div>` : ""}
              <div style="color:#fff;font-size:15px;margin-bottom:8px;">
-               主に使われる言語：${u.language ? u.language : "不明"}
+               主に使われる言語：${u.language||"不明"}
              </div>
              ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
                 `<div style="margin-bottom:10px;">
@@ -323,19 +295,21 @@
       .then(response => response.text())
       .then(csv => {
         universityList = parseCSV(csv);
-        showMarkersByRegion(["北米", "アジア", "ヨーロッパ", "オセアニア"]);
+        // Reitaku Universityも含めて全ての地域を取得
+        const allRegions = Array.from(new Set(universityList.map(u => u.region)));
+        showMarkersByRegion(allRegions);
       });
 
-    // 地域フィルター制御
+    // 地域フィルター制御（簡略化）
     const allBox = document.getElementById('region-all');
     const regionBoxes = document.querySelectorAll('.region-checkbox');
-    allBox.addEventListener('change', () => {
-      regionBoxes.forEach(cb => cb.checked = allBox.checked);
-      showMarkersByRegion(getSelectedRegions());
-    });
-    regionBoxes.forEach(cb => {
+    [allBox, ...regionBoxes].forEach(cb => {
       cb.addEventListener('change', () => {
-        allBox.checked = Array.from(regionBoxes).every(e => e.checked);
+        if (cb === allBox) {
+          regionBoxes.forEach(box => box.checked = allBox.checked);
+        } else {
+          allBox.checked = Array.from(regionBoxes).every(e => e.checked);
+        }
         showMarkersByRegion(getSelectedRegions());
       });
     });
@@ -347,9 +321,6 @@
       map.setCenter([15, 30]);
       map.setZoom(1.2);
       map.once('style.load', () => {
-        new maplibregl.Marker({ element: reitakuIcon, anchor: 'bottom' })
-          .setLngLat([139.9545, 35.8251])
-          .addTo(map);
         showMarkersByRegion(getSelectedRegions());
       });
     });
