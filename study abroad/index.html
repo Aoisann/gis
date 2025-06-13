@@ -15,42 +15,42 @@
       <div style="position:absolute;right:0;top:0;width:15vw;height:100vh;background:linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%);z-index:3;pointer-events:none;filter:blur(12px);"></div>
     </div>
   </div>
-  <!-- 地域フィルター -->
-  <div id="region-legend" style="position:fixed;z-index:2000;top:10px;right:10px;background:rgba(255,255,255,0.95);padding:6px 10px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;line-height:1.7;">
-    <div style="margin-bottom:4px;font-size:14px;">地域で絞り込み：</div>
+  <!-- ベースマップ選択（右上） -->
+  <div id="basemap-box" style="position:fixed;z-index:2000;top:10px;right:10px;background:rgba(245,245,245,0.97);padding:6px 12px 10px 12px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;">
+    <label for="basemap-select" style="font-size:14px;background:#e0e0e0;padding:4px 8px;border-radius:6px;">ベースマップ：</label>
+    <select id="basemap-select">
+      <option value="carto" selected>White</option>
+      <option value="dark">Dark Matter</option>
+    </select>
+  </div>
+  <!-- 地域フィルター（ベースマップ選択の直下） -->
+  <div id="region-legend" style="position:fixed;z-index:2000;top:62px;right:10px;background:rgba(245,245,245,0.97);padding:6px 10px 10px 10px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;line-height:1.7;">
+    <div style="margin-bottom:4px;font-size:14px;background:#e0e0e0;padding:4px 8px;border-radius:6px;">Filter by Region:</div>
     <div id="region-filters" style="margin-bottom:6px; display: flex; flex-direction: column; gap: 8px;">
       <label style="display:flex;align-items:center;">
-        <input type="checkbox" id="region-all" checked style="margin-right:4px;">全て表示
+        <input type="checkbox" id="region-all" checked style="margin-right:4px;">Show All
       </label>
       <label style="display:flex;align-items:center; margin-top:2px;">
-        <input type="checkbox" class="region-checkbox" value="北米" checked style="margin-right:4px;">
-        <img src="R-blue.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">北米
+        <input type="checkbox" class="region-checkbox" value="North America" checked style="margin-right:4px;">
+        <img src="R-blue.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">North America
       </label>
       <label style="display:flex;align-items:center; margin-top:2px;">
-        <input type="checkbox" class="region-checkbox" value="アジア" checked style="margin-right:4px;">
-        <img src="R-purple.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">アジア
+        <input type="checkbox" class="region-checkbox" value="Asia" checked style="margin-right:4px;">
+        <img src="R-purple.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">Asia
       </label>
       <label style="display:flex;align-items:center; margin-top:2px;">
-        <input type="checkbox" class="region-checkbox" value="ヨーロッパ" checked style="margin-right:4px;">
-        <img src="R-blue2.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">ヨーロッパ
+        <input type="checkbox" class="region-checkbox" value="Europe" checked style="margin-right:4px;">
+        <img src="R-blue2.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">Europe
       </label>
       <label style="display:flex;align-items:center; margin-top:2px;">
-        <input type="checkbox" class="region-checkbox" value="オセアニア" checked style="margin-right:4px;">
-        <img src="R-orenge.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">オセアニア
+        <input type="checkbox" class="region-checkbox" value="Oceania" checked style="margin-right:4px;">
+        <img src="R-orenge.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">Oceania
       </label>
-      <!-- 地域フィルターにReitaku Universityを追加 -->
+      <!-- Add Reitaku University to region filter -->
       <label style="display:flex;align-items:center; margin-top:2px;">
         <input type="checkbox" class="region-checkbox" value="Reitaku University" checked style="margin-right:4px;">
         <img src="R透過.png" style="width:20px;height:20px;vertical-align:middle;margin-right:2px;border-radius:50%;border:1px solid #fff;background:#fff;">Reitaku University
       </label>
-    </div>
-    <!-- ベースマップ選択 -->
-    <div id="basemap-box" style="position:fixed;z-index:2000;top:10px;right:220px;background:rgba(255,255,255,0.95);padding:6px 12px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:15px;">
-      <label for="basemap-select" style="font-size:14px;">ベースマップ：</label>
-      <select id="basemap-select">
-        <option value="carto" selected>White</option>
-        <option value="dark">Dark Matter</option>
-      </select>
     </div>
   </div>
   <div id="map"></div>
@@ -72,10 +72,10 @@
 
     // 地域アイコン
     const regionIcon = {
-      "北米": "R-blue.png",
-      "アジア": "R-purple.png",
-      "ヨーロッパ": "R-blue2.png",
-      "オセアニア": "R-orenge.png",
+      "North America": "R-blue.png",
+      "Asia": "R-purple.png",
+      "Europe": "R-blue2.png",
+      "Oceania": "R-orenge.png",
       "Reitaku University": "R透過.png"
     };
 
