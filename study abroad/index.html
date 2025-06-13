@@ -146,14 +146,15 @@
               filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
             }
             plane.style.filter = filter;
-            // 北米の場合は上下反転
-            if (u.region === "北米") {
+            // === 修正: 地域による飛行機の向き ===
+            // 北米のみ上下反転、それ以外は通常
+            if (u.region === "North America") {
               plane.style.transform = `rotate(${angle}deg) scaleY(-1)`;
             } else {
               plane.style.transform = `rotate(${angle}deg)`;
             }
             document.body.appendChild(plane);
-            const frames = 60;
+            const frames = 90; // ← ここを60から90に変更（アニメーションが遅くなる）
             let frame = 0;
             const curveStrength = 0.18;
             const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
@@ -170,13 +171,17 @@
               }
               const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
               const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
+
+              // 拡大率：t=0とt=1で1、t=0.5で最大（例:1.3倍）
+              const scale = 1 + 0.3 * Math.sin(Math.PI * t);
+
+              if (u.region === "North America") {
+                plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${scale})`;
+              } else {
+                plane.style.transform = `rotate(${angle}deg) scale(${scale})`;
+              }
               plane.style.left = `${x - 19}px`;
               plane.style.top = `${y - 19}px`;
-              if (u.region === "北米") {
-                plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
-              } else {
-                plane.style.transform = `rotate(${angle}deg) scale(${1 + 0.15 * Math.sin(Math.PI * t)})`;
-              }
               plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
               requestAnimationFrame(animatePlane);
             }
@@ -195,7 +200,7 @@
           el.style.width = '56px';
           el.style.height = '56px';
           el.style.zIndex = '10';
-          el.style.filter = (u.region === "アジア" || u.region === "オセアニア")
+          el.style.filter = (u.region === "Asia" || u.region === "Oceania")
             ? 'drop-shadow(0 0 6px #e91e63aa)'
             : 'drop-shadow(0 0 6px #1976d2aa)';
           // 大学情報パネル
