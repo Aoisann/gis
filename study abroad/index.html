@@ -212,18 +212,17 @@
             infoDiv.style.left = '0';
             infoDiv.style.bottom = '0';
             infoDiv.style.height = '50vh';
-            infoDiv.style.width = '250px'; // ← 横幅を少し小さく
-            infoDiv.style.transform = 'translateX(-270px)';
+            infoDiv.style.width = '250px'; // 横幅を小さく戻す
+            infoDiv.style.transform = 'translateX(0)';
             infoDiv.style.transition = 'transform 0.4s cubic-bezier(.77,0,.18,1)';
+            infoDiv.style.background = '#fff';
+            infoDiv.style.boxShadow = '2px 0 12px rgba(0,0,0,0.13)';
             infoDiv.style.zIndex = '3000';
-            infoDiv.style.background = 'rgba(44, 62, 80, 0.7)';
-            infoDiv.style.boxShadow = '2px 0 16px rgba(0,0,0,0.13)';
-            infoDiv.style.padding = '32px 28px 24px 28px';
-            infoDiv.style.fontSize = '16px';
-            infoDiv.style.borderTopRightRadius = '18px';
-            infoDiv.style.display = 'flex';
-            infoDiv.style.flexDirection = 'column';
-            infoDiv.style.justifyContent = 'flex-start';
+            infoDiv.style.overflowY = 'auto';
+            infoDiv.style.borderTopRightRadius = '12px';
+            infoDiv.style.borderBottomRightRadius = '12px';
+            infoDiv.style.padding = '24px 20px 20px 20px';
+            infoDiv.style.fontSize = '15px';
             document.body.appendChild(infoDiv);
             setTimeout(() => {
               infoDiv.style.transform = 'translateX(0)';
@@ -232,16 +231,16 @@
             infoDiv.style.transform = 'translateX(0)';
           }
           infoDiv.innerHTML =
-            `<div style="font-weight:bold;font-size:22px;margin-bottom:14px;color:#fff;text-shadow:0 2px 8px #0002;">${u.name}</div>
-             <div style="color:#e0f7fa;font-size:17px;margin-bottom:8px;">${u["english name"]||""}</div>
-             <div style="color:#b2dfdb;font-size:16px;margin-bottom:8px;">${u.country||""}</div>
+            `<div style="font-weight:bold;font-size:20px;margin-bottom:12px;color:#333;text-shadow:0 1px 4px #0002;">${u.name}</div>
+             <div style="color:#666;font-size:15px;margin-bottom:8px;">${u["english name"]||""}</div>
+             <div style="color:#999;font-size:14px;margin-bottom:8px;">${u.country||""}</div>
              ${u.country ? `<div style="margin-bottom:12px;"><img src="flags/${u.country.trim()}.png" alt="${u.country}" style="width:56px;height:38px;vertical-align:middle;border-radius:0;border:2px solid #fff;background:#fff;box-shadow:0 2px 8px #0002;"></div>` : ""}
-             <div style="color:#fff;font-size:15px;margin-bottom:8px;">
+             <div style="color:#333;font-size:14px;margin-bottom:8px;">
                主に使われる言語：${u.language||"不明"}
              </div>
              ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
                 `<div style="margin-bottom:10px;">
-                   <a href="${u.URL.trim()}" target="_blank" style="color:#fff;text-decoration:underline;word-break:break-all;font-size:17px;">
+                   <a href="${u.URL.trim()}" target="_blank" style="color:#1976d2;text-decoration:underline;word-break:break-all;font-size:15px;">
                      ホームページはこちらから
                    </a>
                  </div>` : ""}

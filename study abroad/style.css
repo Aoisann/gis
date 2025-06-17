@@ -154,9 +154,9 @@ html, body {
   bottom: 0;
   height: 50vh;
   width: 250px;
-  transform: translateX(-270px);
+  transform: translateX(0);
   transition: transform 0.4s cubic-bezier(.77,0,.18,1);
-  background: #fff;
+  background: rgba(60, 60, 60, 0.7); /* 透明のグレー */
   box-shadow: 2px 0 12px rgba(0,0,0,0.13);
   z-index: 3000;
   overflow-y: auto;
