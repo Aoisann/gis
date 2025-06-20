@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>長野周辺の人口マップ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: 'Segoe UI', 'Meiryo', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 24px;
+        }
+        #map {
+            height: 600px;
+            width: 90vw;
+            max-width: 1000px;
+            margin: 24px auto 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>長野周辺の人口マップ</h1>
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // 長野県を中心に地図を表示
+        var map = L.map('map').setView([36.6513, 138.1810], 10);
+
+        // タイルレイヤー追加
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 外部GeoJSONファイル（MT.Fuji.jeojson）を読み込む
+        fetch('MT.Fuji.jeojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    onEachFeature: function (feature, layer) {
+                        // プロパティ名はGeoJSONの内容に合わせて調整してください
+                        var name = feature.properties.name || "不明";
+                        var population = feature.properties.population || "不明";
+                        layer.bindPopup(
+                            name + "<br>人口: " + population.toLocaleString() + "人"
+                        );
+                    }
+                }).addTo(map);
+            })
+            .catch(error => {
+                console.error('GeoJSONの読み込みに失敗しました:', error);
+            });
+    </script>
+</body>
+</html>

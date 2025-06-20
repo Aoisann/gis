@@ -1,66 +1,345 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>Tokyo 1km Mesh Population Map</title>
-		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-		<link
-			href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css"
-			rel="stylesheet"
-		/>
-		<style>
-			body {
-				margin: 0;
-				padding: 0;
-			}
-			#map {
-				width: 100%;
-				height: 100vh;
-			}
-		</style>
-	</head>
-	<body>
-		<div id="map"></div>
-		<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-		<script>
-			const map = new maplibregl.Map({
-				container: 'map',
-				style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-				center: [139.75, 35.68],
-				zoom: 9
-			});
+<head>
+    <meta charset="utf-8" />
+    <title>Shizuoka 1km Mesh Population Map</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { width: 100%; height: 100vh; }
+        .map-title {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255,255,255,0.85);
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #222;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            pointer-events: none;
+            user-select: none;
+        }
+        .gradient-legend {
+            position: absolute;
+            left: 24px;
+            bottom: 32px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.97);
+            padding: 16px 24px 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-width: 340px;
+            user-select: none;
+        }
+        .gradient-bar {
+            position: relative;
+            display: flex;
+        }
+        .legend-segment {
+            flex: 1;
+            height: 22px;
+            cursor: pointer;
+        }
+        .gradient-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1em;
+            color: #222;
+            margin-bottom: 2px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .gradient-caption {
+            text-align: center;
+            font-size: 1em;
+            color: #444;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="map-title">Shizuoka Choropleth Map</div>
+    <div id="map"></div>
+    <div class="gradient-legend" id="legend"></div>
+    <div id="popup" style="display:none; position:absolute; z-index:2000; pointer-events:none; background:rgba(255,255,255,0.95); border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.12); padding:10px 16px; font-size:1em; color:#222; border:1px solid #bbb;"></div>
+    <select id="styleSwitcher" style="position:absolute;top:16px;right:16px;z-index:2001;padding:6px 12px;border-radius:6px;font-size:1em;box-shadow:0 2px 8px rgba(0,0,0,0.12);">
+        <option value="Dark Matter">Dark Matter</option>
+        <option value="Google Maps">Google Maps</option>
+    </select>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+    <script>
+        // ベースマップスタイル
+        const baseStyles = {
+            "Dark Matter": "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+            "Google Maps": {
+                version: 8,
+                sources: {
+                    google: {
+                        type: "raster",
+                        tiles: [
+                            "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                        ],
+                        tileSize: 256,
+                        attribution: 'Map data &copy; <a href="https://www.google.com/intl/en_us/help/terms_maps/" target="_blank">Google</a>',
+                        maxzoom: 21
+                    }
+                },
+                layers: [
+                    {
+                        id: "google-layer",
+                        type: "raster",
+                        source: "google"
+                    }
+                ]
+            }
+        };
 
-			map.on('load', () => {
-				map.addSource('tokyo', {
-					type: 'geojson',
-					data: 'tokyo_population.geojson'
-				});
+        // メッシュ色と凡例
+        const meshColors = {
+            "Dark Matter": [
+                0,    '#ffffcc',
+                2000, '#41b6c4',
+                4000, '#253494',
+                10000, '#800026'
+            ],
+            "Google Maps": [
+                0,    '#08306b',
+                2000, '#2171b5',
+                4000, '#6baed6',
+                10000, '#c6dbef'
+            ]
+        };
 
-				map.addLayer({
-					id: 'population-layer',
-					type: 'fill',
-					source: 'tokyo',
-					paint: {
-						'fill-color': [
-							'interpolate',
-							['linear'],
-							['get', 'T001100001'],
-							0,
-							'#f0f9e8',
-							5000,
-							'#bae4bc',
-							10000,
-							'#7bccc4',
-							15000,
-							'#2b8cbe',
-							20000,
-							'#08589e'
-						],
-						'fill-opacity': 0.75,
-						'fill-outline-color': '#ffffff'
-					}
-				});
-			});
-		</script>
-	</body>
+        const legendSegments = {
+            "Dark Matter": [
+                { min: 0, max: 1999, color: '#ffffcc', label: '0～1,999' },
+                { min: 2000, max: 3999, color: '#41b6c4', label: '2,000～3,999' },
+                { min: 4000, max: 9999, color: '#253494', label: '4,000～9,999' },
+                { min: 10000, max: 999999, color: '#800026', label: '10,000+' }
+            ],
+            "Google Maps": [
+                { min: 0, max: 1999, color: '#08306b', label: '0～1,999' },
+                { min: 2000, max: 3999, color: '#2171b5', label: '2,000～3,999' },
+                { min: 4000, max: 9999, color: '#6baed6', label: '4,000～9,999' },
+                { min: 10000, max: 999999, color: '#c6dbef', label: '10,000+' }
+            ]
+        };
+
+        // 凡例のHTMLを生成する関数
+        function updateLegend(styleName) {
+            const legend = document.getElementById('legend');
+            const segments = legendSegments[styleName];
+            legend.innerHTML = `
+                <div class="gradient-bar">
+                    ${segments.map(seg => `
+                        <div class="legend-segment" data-min="${seg.min}" data-max="${seg.max}" style="background:${seg.color};" title="${seg.label}"></div>
+                    `).join('')}
+                </div>
+                <div class="gradient-labels">
+                    <span>0</span>
+                    <span>2,000</span>
+                    <span>4,000</span>
+                    <span>10,000+</span>
+                </div>
+                <div class="gradient-caption">Total Population</div>
+                <div style="text-align:right; font-size:0.9em; color:#555; margin-top:6px;">
+                    ※2024年3月14日時点の人口および世帯の情報です
+                </div>
+            `;
+
+            // 色説明バーの各色にホバーイベントを再設定
+            document.querySelectorAll('.legend-segment').forEach((segment) => {
+                segment.addEventListener('mouseenter', function() {
+                    const min = Number(this.dataset.min);
+                    const max = Number(this.dataset.max);
+                    activeFilter = [
+                        'all',
+                        ['has', 'T001140001'],
+                        ['>', ['get', 'T001140001'], 0],
+                        ['>=', ['get', 'T001140001'], min],
+                        ['<=', ['get', 'T001140001'], max]
+                    ];
+                    map.setFilter('population-layer', activeFilter);
+                    this.style.outline = '3px solid #222';
+                });
+                segment.addEventListener('mouseleave', function() {
+                    activeFilter = [
+                        'all',
+                        ['has', 'T001140001'],
+                        ['>', ['get', 'T001140001'], 0]
+                    ];
+                    map.setFilter('population-layer', activeFilter);
+                    this.style.outline = '';
+                });
+            });
+        }
+
+        // 人口メッシュレイヤー追加用関数
+        function addPopulationLayer(styleName) {
+            if (!map.getSource('sizuoka')) {
+                map.addSource('sizuoka', {
+                    type: 'geojson',
+                    data: 'Mt.Fuji_population.geojson'
+                });
+            }
+            if (!map.getLayer('population-layer')) {
+                map.addLayer({
+                    id: 'population-layer',
+                    type: 'fill',
+                    source: 'sizuoka',
+                    paint: {
+                        'fill-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['get', 'T001140001'],
+                            ...meshColors[styleName]
+                        ],
+                        'fill-opacity': 0.8,
+                        'fill-outline-color': '#ffffff'
+                    },
+                    filter: [
+                        'all',
+                        ['has', 'T001140001'],
+                        ['>', ['get', 'T001140001'], 0]
+                    ]
+                });
+            }
+        }
+
+        // グローバルでピンを一度だけ生成・管理
+        let mtFujiMarker = null;
+
+        function createMtFujiPin() {
+            const mtFujiPin = document.createElement('div');
+            mtFujiPin.style.position = 'relative';
+            mtFujiPin.style.width = '48px';
+            mtFujiPin.style.height = '72px';
+            mtFujiPin.style.cursor = 'pointer';
+            mtFujiPin.innerHTML = `
+                <svg width="48" height="72" viewBox="0 0 48 72" style="position:absolute;top:0;left:0;z-index:1;">
+                    <circle cx="24" cy="24" r="18" fill="#1976d2" stroke="#0d47a1" stroke-width="3"/>
+                    <rect x="21" y="42" width="6" height="24" rx="3" fill="#888" />
+                </svg>
+                <div style="
+                    position: absolute;
+                    top: 8px;
+                    left: 0;
+                    width: 48px;
+                    height: 36px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.4rem;
+                    z-index:2;
+                    pointer-events: none;
+                    ">
+                    🗻
+                </div>
+                <div id="mtfuji-label" style="
+                    display:none;
+                    position:absolute;
+                    top:-28px;
+                    left:50%;
+                    transform:translateX(-50%);
+                    background:rgba(255,255,255,0.95);
+                    color:#222;
+                    border-radius:6px;
+                    padding:4px 12px;
+                    font-size:1em;
+                    font-weight:bold;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.12);
+                    white-space:nowrap;
+                    z-index:3;
+                    border:1px solid #bbb;
+                    pointer-events:none;
+                ">富士山</div>
+            `;
+            mtFujiPin.addEventListener('mouseenter', () => {
+                mtFujiPin.querySelector('#mtfuji-label').style.display = 'block';
+            });
+            mtFujiPin.addEventListener('mouseleave', () => {
+                mtFujiPin.querySelector('#mtfuji-label').style.display = 'none';
+            });
+            return mtFujiPin;
+        }
+
+        // 初期スタイル名
+        let currentStyleName = "Dark Matter";
+        let activeFilter = null;
+
+        // マップ初期化
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: baseStyles[currentStyleName],
+            center: [138.3831, 34.9769],
+            zoom: 9
+        });
+
+        // スタイル切り替えUI
+        const styleSwitcher = document.getElementById('styleSwitcher');
+        styleSwitcher.value = currentStyleName;
+
+        // 初期ロード時
+        map.on('load', () => {
+            addPopulationLayer(currentStyleName);
+            updateLegend(currentStyleName);
+
+            // 富士山ピンを一度だけ生成・追加
+            if (!mtFujiMarker) {
+                mtFujiMarker = new maplibregl.Marker({ element: createMtFujiPin(), anchor: 'bottom' })
+                    .setLngLat([138.7274, 35.3606])
+                    .addTo(map);
+            }
+
+            // ポップアップ
+            map.on('mousemove', 'population-layer', (e) => {
+                map.getCanvas().style.cursor = 'pointer';
+                const feature = e.features[0];
+                const population = feature.properties.T001140001 ?? '不明';
+                const popup = document.getElementById('popup');
+                popup.innerHTML = `<strong>人口:</strong> ${population}`;
+                popup.style.display = 'block';
+                popup.style.left = (e.point.x + 15) + 'px';
+                popup.style.top = (e.point.y + 15) + 'px';
+            });
+            map.on('mouseleave', 'population-layer', () => {
+                map.getCanvas().style.cursor = '';
+                document.getElementById('popup').style.display = 'none';
+            });
+        });
+
+        // スタイル切り替え時
+        styleSwitcher.addEventListener('change', function() {
+            currentStyleName = this.value;
+            map.setStyle(baseStyles[this.value]);
+        });
+
+        // スタイル切り替え後に再追加
+        map.on('styledata', () => {
+            addPopulationLayer(currentStyleName);
+            updateLegend(currentStyleName);
+
+            // 富士山ピンは再生成・再追加しない
+            // ポップアップ再追加
+            map.on('mousemove', 'population-layer', (e) => {
+                map.getCanvas().style.cursor = 'pointer';
+                const feature = e.features[0];
+                const population = feature.properties.T001140001 ?? '不明';
+                const popup = document.getElementById('popup');
+                popup.innerHTML = `<strong>人口:</strong> ${population}`;
+                popup.style.display = 'block';
+                popup.style.left = (e.point.x + 15) + 'px';
+                popup.style.top = (e.point.y + 15) + 'px';
+            });
+            map.on('mouseleave', 'population-layer', () => {
+                map.getCanvas().style.cursor = '';
+                document.getElementById('popup').style.display = 'none';
+            });
+        });
+    </script>
+</body>
 </html>
