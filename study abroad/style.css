@@ -162,18 +162,135 @@ html, body {
   overflow-y: auto;
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
+  padding: 24px 20px 20px 20px;
+  font-size: 15px;
+}
+
+/* タイトル */
+#univ-info .univ-title {
+  font-weight: bold;
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #fff;
+  text-shadow: 0 1px 4px #0002;
+}
+
+/* 英語名 */
+#univ-info .univ-ename {
+  color: #eee;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+/* 国名 */
+#univ-info .univ-country {
+  color: #ccc;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* 国旗 */
+#univ-info .univ-flag {
+  margin-bottom: 12px;
+}
+#univ-info .univ-flag img {
+  width: 56px;
+  height: 38px;
+  vertical-align: middle;
+  border-radius: 0;
+  border: 2px solid #fff;
+  background: #fff;
+  box-shadow: 0 2px 8px #0002;
+}
+
+/* 言語 */
+#univ-info .univ-lang {
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* リンク */
+#univ-info .univ-link {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+#univ-info .univ-link a {
+  display: inline-block;
+  color: #1976d2;
+  background: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 15px;
+  text-decoration: none;
+  font-weight: bold;
+  border: 2px solid #1976d2;
+  box-shadow: 0 2px 8px #0001;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  min-width: 120px;
+}
+
+#univ-info .univ-link a:hover {
+  background: #1976d2;
+  color: #fff;
+  border: 2px solid #1565c0;
+  text-decoration: underline;
+}
+
+/* ボタン */
+#univ-info .univ-btn {
+  display: block;
+  color: #1976d2;
+  background: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 15px;
+  text-decoration: none;
+  font-weight: bold;
+  border: 2px solid #1976d2;
+  box-shadow: 0 2px 8px #0001;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  margin-bottom: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+#univ-info .univ-btn:hover {
+  background: #1976d2;
+  color: #fff;
+  border: 2px solid #1565c0;
+  text-decoration: underline;
+}
+
+/* 閉じるボタン */
+#univ-info .univ-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: rgba(0,0,0,0.12);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 22px;
+  color: #fff;
+  cursor: pointer;
 }
 
 /* 検索ボックス（もし再利用する場合） */
 #search-box {
   position: fixed;
+  top: 10px;
+  left: 10px;
   z-index: 2100;
-  top: 10px; left: 10px;
   background: rgba(255,255,255,0.97);
   padding: 8px 14px 12px 14px;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.13);
-  width: 270px;
+  width: 220px;
 }
 #search-input {
   width: 100%;
@@ -187,6 +304,26 @@ html, body {
   margin-top: 8px;
   max-height: 220px;
   overflow-y: auto;
+}
+
+#univ-list {
+  margin-top: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+  font-size: 15px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 6px 4px;
+}
+#univ-list div {
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+#univ-list div:hover {
+  background: #e3f2fd;
 }
 
 /* その他必要に応じて追加 */

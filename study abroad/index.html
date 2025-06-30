@@ -53,6 +53,11 @@
       </label>
     </div>
   </div>
+  <!-- 検索ボックスをHTMLに追加 -->
+  <div id="search-box">
+    <input id="search-input" type="text" placeholder="大学名で検索">
+    <div id="univ-list"></div>
+  </div>
   <div id="map"></div>
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
   <script>
@@ -105,242 +110,125 @@
         el.classList.add('univ-marker-img');
         el.addEventListener('click', function(e) {
           e.stopPropagation();
-
-          // --- 飛行機アニメーション（麗澤大学以外のみ） ---
-          if (u.region !== "Reitaku University") {
-            const reitakuLngLat = [139.9545, 35.8251];
-            const destLngLat = [u.lng, u.lat];
-            const reitakuPoint = map.project(reitakuLngLat);
-            const destPoint = map.project(destLngLat);
-            const oldPlane = document.getElementById('fly-plane');
-            if (oldPlane) oldPlane.remove();
-            const plane = document.createElement('img');
-            plane.src = 'plane1.png';
-            plane.id = 'fly-plane';
-            plane.style.position = 'fixed';
-            plane.style.width = '38px';
-            plane.style.height = '38px';
-            plane.style.left = `${reitakuPoint.x - 19}px`;
-            plane.style.top = `${reitakuPoint.y - 19}px`;
-            plane.style.zIndex = 4000;
-            plane.style.pointerEvents = 'none';
-            plane.style.transition = 'none';
-            let dx = destPoint.x - reitakuPoint.x;
-            let dy = destPoint.y - reitakuPoint.y;
-            if (Math.abs(dx) > window.innerWidth / 2) {
-              dx = dx > 0 ? dx - window.innerWidth : dx + window.innerWidth;
-            }
-            const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-            let filter = '';
-            if (map.getStyle().sprite && map.getStyle().sprite.includes('dark-matter')) {
-              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
-            } else if (
-              map.getStyle().sources &&
-              JSON.stringify(map.getStyle().sources).includes('dark-matter')
-            ) {
-              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
-            } else if (
-              map.getStyle().name &&
-              map.getStyle().name.toLowerCase().includes('dark')
-            ) {
-              filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
-            }
-            plane.style.filter = filter;
-            // === 修正: 地域による飛行機の向き ===
-            // 北米のみ上下反転、それ以外は通常
-            if (u.region === "North America") {
-              plane.style.transform = `rotate(${angle}deg) scaleY(-1)`;
-            } else {
-              plane.style.transform = `rotate(${angle}deg)`;
-            }
-            document.body.appendChild(plane);
-            const frames = 90; // ← ここを60から90に変更（アニメーションが遅くなる）
-            let frame = 0;
-            const curveStrength = 0.18;
-            const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
-            const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
-            function bezier(t, p0, p1, p2) {
-              return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
-            }
-            function animatePlane() {
-              frame++;
-              const t = frame / frames;
-              if (t > 1) {
-                plane.remove();
-                return;
-              }
-              const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
-              const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
-
-              // 拡大率：t=0とt=1で1、t=0.5で最大（例:1.3倍）
-              const scale = 1 + 0.3 * Math.sin(Math.PI * t);
-
-              if (u.region === "North America") {
-                plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${scale})`;
-              } else {
-                plane.style.transform = `rotate(${angle}deg) scale(${scale})`;
-              }
-              plane.style.left = `${x - 19}px`;
-              plane.style.top = `${y - 19}px`;
-              plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
-              requestAnimationFrame(animatePlane);
-            }
-            animatePlane();
-          }
-          // --- ここまで飛行機アニメーション ---
-
-          // ピン画像リセット
-          document.querySelectorAll('.univ-marker-img').forEach(img => {
-            img.style.width = '40px';
-            img.style.height = '40px';
-            img.style.zIndex = '';
-            img.style.filter = '';
-          });
-          // この大学ピンだけ大きく
-          el.style.width = '56px';
-          el.style.height = '56px';
-          el.style.zIndex = '10';
-          el.style.filter = (u.region === "Asia" || u.region === "Oceania")
-            ? 'drop-shadow(0 0 6px #e91e63aa)'
-            : 'drop-shadow(0 0 6px #1976d2aa)';
-          // 大学情報パネル
-          let infoDiv = document.getElementById('univ-info');
-          if (!infoDiv) {
-            infoDiv = document.createElement('div');
-            infoDiv.id = 'univ-info';
-            infoDiv.style.position = 'fixed';
-            infoDiv.style.left = '0';
-            infoDiv.style.bottom = '0';
-            infoDiv.style.height = '50vh';
-            infoDiv.style.width = '250px'; // 横幅を小さく戻す
-            infoDiv.style.transform = 'translateX(0)';
-            infoDiv.style.transition = 'transform 0.4s cubic-bezier(.77,0,.18,1)';
-            infoDiv.style.background = '#fff';
-            infoDiv.style.boxShadow = '2px 0 12px rgba(0,0,0,0.13)';
-            infoDiv.style.zIndex = '3000';
-            infoDiv.style.overflowY = 'auto';
-            infoDiv.style.borderTopRightRadius = '12px';
-            infoDiv.style.borderBottomRightRadius = '12px';
-            infoDiv.style.padding = '24px 20px 20px 20px';
-            infoDiv.style.fontSize = '15px';
-            document.body.appendChild(infoDiv);
-            setTimeout(() => {
-              infoDiv.style.transform = 'translateX(0)';
-            }, 10);
-          } else {
-            infoDiv.style.transform = 'translateX(0)';
-          }
-          infoDiv.innerHTML =
-            `<div style="font-weight:bold;font-size:20px;margin-bottom:12px;color:#333;text-shadow:0 1px 4px #0002;">${u.name}</div>
-             <div style="color:#666;font-size:15px;margin-bottom:8px;">${u["english name"]||""}</div>
-             <div style="color:#999;font-size:14px;margin-bottom:8px;">${u.country||""}</div>
-             ${u.country ? `<div style="margin-bottom:12px;"><img src="flags/${u.country.trim()}.png" alt="${u.country}" style="width:56px;height:38px;vertical-align:middle;border-radius:0;border:2px solid #fff;background:#fff;box-shadow:0 2px 8px #0002;"></div>` : ""}
-             <div style="color:#333;font-size:14px;margin-bottom:8px;">
-               主に使われる言語：${u.language||"不明"}
-             </div>
-             ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
-                `<div style="margin-bottom:10px;">
-                   <a href="${u.URL.trim()}" target="_blank" style="color:#1976d2;text-decoration:underline;word-break:break-all;font-size:15px;">
-                     ホームページはこちらから
-                   </a>
-                 </div>` : ""}
-             <button id="zoom-to-univ" style="margin-bottom:12px;padding:8px 18px;background:#1976d2;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;">もっと見る</button>
-             <button id="close-univ-info" style="position:absolute;top:12px;right:16px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:36px;height:36px;font-size:22px;color:#fff;cursor:pointer;">×</button>`;
-          let prevCenter = map.getCenter();
-          let prevZoom = map.getZoom();
-          const zoomBtn = document.getElementById('zoom-to-univ');
-          zoomBtn.onclick = function() {
-            prevCenter = map.getCenter();
-            prevZoom = map.getZoom();
-            map.flyTo({
-              center: [u.lng, u.lat],
-              zoom: 13,
-              speed: 1.2,
-              curve: 1.4,
-              essential: true
-            });
-            zoomBtn.textContent = "戻る";
-            zoomBtn.onclick = function() {
-              map.flyTo({
-                center: prevCenter,
-                zoom: prevZoom,
-                speed: 1.2,
-                curve: 1.4,
-                essential: true
-              });
-              zoomBtn.textContent = "もっと見る";
-              zoomBtn.onclick = arguments.callee;
-            };
-          };
-          document.getElementById('close-univ-info').onclick = function() {
-            infoDiv.style.transform = 'translateX(-340px)';
-          };
+          handleUnivPinClick(u, el);
         });
         allMarkers.push(marker);
       });
     }
 
-    // CSVパース
-    function parseCSV(csv) {
-      const [header, ...lines] = csv.trim().split('\n');
-      const headers = header.split(',').map(h => h.trim().replace(/\r/g, ""));
-      return lines.map(line => {
-        const cols = line.split(',');
-        const obj = {};
-        headers.forEach((h, i) => obj[h] = cols[i] ? cols[i].trim() : "");
-        obj.lng = parseFloat(obj["経度"]);
-        obj.lat = parseFloat(obj["緯度"]);
-        return obj;
-      });
-    }
-
-    // CSV読み込みと初期ピン表示
-    fetch('大学ホームページ一覧_確定版.csv')
-      .then(response => response.text())
-      .then(csv => {
-        universityList = parseCSV(csv);
-        // Reitaku Universityも含めて全ての地域を取得
-        const allRegions = Array.from(new Set(universityList.map(u => u.region)));
-        showMarkersByRegion(allRegions);
-      });
-
-    // 地域フィルター制御（簡略化）
-    const allBox = document.getElementById('region-all');
-    const regionBoxes = document.querySelectorAll('.region-checkbox');
-    [allBox, ...regionBoxes].forEach(cb => {
-      cb.addEventListener('change', () => {
-        if (cb === allBox) {
-          regionBoxes.forEach(box => box.checked = allBox.checked);
+    function handleUnivPinClick(u, el) {
+      // --- 飛行機アニメーション（麗澤大学以外のみ） ---
+      if (u.region !== "Reitaku University") {
+        const reitakuLngLat = [139.9545, 35.8251];
+        const destLngLat = [u.lng, u.lat];
+        const reitakuPoint = map.project(reitakuLngLat);
+        const destPoint = map.project(destLngLat);
+        const oldPlane = document.getElementById('fly-plane');
+        if (oldPlane) oldPlane.remove();
+        const plane = document.createElement('img');
+        plane.src = 'plane1.png';
+        plane.id = 'fly-plane';
+        plane.style.position = 'fixed';
+        plane.style.width = '38px';
+        plane.style.height = '38px';
+        plane.style.left = `${reitakuPoint.x - 19}px`;
+        plane.style.top = `${reitakuPoint.y - 19}px`;
+        plane.style.zIndex = 4000;
+        plane.style.pointerEvents = 'none';
+        plane.style.transition = 'none';
+        let dx = destPoint.x - reitakuPoint.x;
+        let dy = destPoint.y - reitakuPoint.y;
+        if (Math.abs(dx) > window.innerWidth / 2) {
+          dx = dx > 0 ? dx - window.innerWidth : dx + window.innerWidth;
+        }
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+        let filter = '';
+        if (map.getStyle().sprite && map.getStyle().sprite.includes('dark-matter')) {
+          filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+        } else if (
+          map.getStyle().sources &&
+          JSON.stringify(map.getStyle().sources).includes('dark-matter')
+        ) {
+          filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+        } else if (
+          map.getStyle().name &&
+          map.getStyle().name.toLowerCase().includes('dark')
+        ) {
+          filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
+        }
+        plane.style.filter = filter;
+        if (u.region === "North America") {
+          plane.style.transform = `rotate(${angle}deg) scaleY(-1)`;
         } else {
-          allBox.checked = Array.from(regionBoxes).every(e => e.checked);
+          plane.style.transform = `rotate(${angle}deg)`;
         }
-        showMarkersByRegion(getSelectedRegions());
-      });
-    });
-
-    // ベースマップ切替
-    document.getElementById('basemap-select').addEventListener('change', function() {
-      const val = this.value;
-      map.setStyle(baseStyles[val]);
-      map.setCenter([15, 30]);
-      map.setZoom(1.2);
-      map.once('style.load', () => {
-        showMarkersByRegion(getSelectedRegions());
-      });
-    });
-
-    // スプラッシュ画像フェードアウト
-    window.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        const splash = document.getElementById('splash');
-        if (splash) {
-          splash.style.transition = 'opacity 1.2s cubic-bezier(.77,0,.18,1), transform 1.2s cubic-bezier(.77,0,.18,1)';
-          splash.style.opacity = '0';
-          splash.style.transform = 'translateX(-100vw)';
-          setTimeout(() => splash.remove(), 1200);
+        document.body.appendChild(plane);
+        const frames = 90;
+        let frame = 0;
+        const curveStrength = 0.18;
+        const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
+        const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
+        function bezier(t, p0, p1, p2) {
+          return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
         }
-      }, 2000);
-    });
-  </script>
-</body>
-</html>
+        function animatePlane() {
+          frame++;
+          const t = frame / frames;
+          if (t > 1) {
+            plane.remove();
+            return;
+          }
+          const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
+          const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
+          const scale = 1 + 0.3 * Math.sin(Math.PI * t);
+          if (u.region === "North America") {
+            plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${scale})`;
+          } else {
+            plane.style.transform = `rotate(${angle}deg) scale(${scale})`;
+          }
+          plane.style.left = `${x - 19}px`;
+          plane.style.top = `${y - 19}px`;
+          plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
+          requestAnimationFrame(animatePlane);
+        }
+        animatePlane();
+      }
+      // --- ここまで飛行機アニメーション ---
+
+      // ピン画像リセット
+      document.querySelectorAll('.univ-marker-img').forEach(img => {
+        img.style.width = '40px';
+        img.style.height = '40px';
+        img.style.zIndex = '';
+        img.style.filter = '';
+      });
+      // この大学ピンだけ大きく
+      if (el) {
+        el.style.width = '56px';
+        el.style.height = '56px';
+        el.style.zIndex = '10';
+        el.style.filter = (u.region === "Asia" || u.region === "Oceania")
+          ? 'drop-shadow(0 0 6px #e91e63aa)'
+          : 'drop-shadow(0 0 6px #1976d2aa)';
+      }
+      // 大学情報パネル
+      let infoDiv = document.getElementById('univ-info');
+      if (!infoDiv) {
+        infoDiv = document.createElement('div');
+        infoDiv.id = 'univ-info';
+        document.body.appendChild(infoDiv);
+        setTimeout(() => {
+          infoDiv.style.transform = 'translateX(0)';
+        }, 10);
+      } else {
+        infoDiv.style.transform = 'translateX(0)';
+      }
+      infoDiv.innerHTML =
+        `<div class="univ-title">${u.name}</div>
+         <div class="univ-ename">${u["english name"]||""}</div>
+         <div class="univ-country">${u.country||""}</div>
+         ${u.country ? `<div class="univ-flag"><img src="flags/${u.country.trim()}.png" alt="${u.country}"></div>` : ""}
+         <div class="univ-lang">主に使われる言語：${u.language||"不明"}</div>
+         ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
+            `<div class="univ-link">
+            
