@@ -87,6 +87,44 @@
     let allMarkers = [];
     let universityList = [];
 
+    // ベースマップ切り替え機能を追加
+    document.getElementById('basemap-select').addEventListener('change', function(e) {
+      const styleKey = e.target.value;
+      map.setStyle(baseStyles[styleKey]);
+      map.once('style.load', function() {
+        showMarkersByRegion(getSelectedRegions());
+      });
+    });
+
+    // CSVから大学リストを読み込む
+    fetch('大学ホームページ一覧_確定版.csv')
+      .then(response => response.text())
+      .then(csv => {
+        // 1行目はヘッダーなのでスキップ
+        universityList = csv.trim().split('\n').slice(1).map(line => {
+          const [region, country, name, englishName, lat, lng, URL, language, Time] = line.split(',');
+          return {
+            region: region,
+            country: country,
+            name: name,
+            "english name": englishName,
+            lat: parseFloat(lat),
+            lng: parseFloat(lng),
+            URL: URL,
+            language: language,
+            Time: Time
+          };
+        });
+
+        // すべての地域を選択状態にする（CSV読み込み後に実行）
+        document.querySelectorAll('.region-checkbox').forEach(cb => cb.checked = true);
+
+        // データ読み込み後にピンを表示
+        showMarkersByRegion(getSelectedRegions());
+        // 大学名一覧も再描画（必要なら）
+        // renderUnivList(universityList);
+      });
+
     // 地域選択取得
     function getSelectedRegions() {
       return Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
@@ -98,16 +136,19 @@
       allMarkers = [];
       universityList.forEach(u => {
         if (!selectedRegions.includes(u.region)) return;
-        let el = document.createElement('img');
-        el.src = regionIcon[u.region];
+        // 緯度経度が数値でなければスキップ
+        if (isNaN(u.lng) || isNaN(u.lat)) return;
+        // ピン画像要素を毎回生成
+        const el = document.createElement('img');
+        el.src = regionIcon[u.region] || 'default.png';
         el.style.width = '40px';
         el.style.height = '40px';
         el.style.background = 'transparent';
         el.style.cursor = 'pointer';
+        el.classList.add('univ-marker-img');
         const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([u.lng, u.lat])
           .addTo(map);
-        el.classList.add('univ-marker-img');
         el.addEventListener('click', function(e) {
           e.stopPropagation();
           handleUnivPinClick(u, el);
@@ -117,14 +158,21 @@
     }
 
     function handleUnivPinClick(u, el) {
+      // --- 既存の飛行機・Time要素を必ず消す ---
+      const oldPlane = document.getElementById('fly-plane');
+      if (oldPlane) oldPlane.remove();
+      const oldMidPlane = document.getElementById('mid-plane');
+      if (oldMidPlane) oldMidPlane.remove();
+      const oldMidTime = document.getElementById('mid-time');
+      if (oldMidTime) oldMidTime.remove();
+
       // --- 飛行機アニメーション（麗澤大学以外のみ） ---
       if (u.region !== "Reitaku University") {
+        // 既存の飛行機アニメーション
         const reitakuLngLat = [139.9545, 35.8251];
         const destLngLat = [u.lng, u.lat];
         const reitakuPoint = map.project(reitakuLngLat);
         const destPoint = map.project(destLngLat);
-        const oldPlane = document.getElementById('fly-plane');
-        if (oldPlane) oldPlane.remove();
         const plane = document.createElement('img');
         plane.src = 'plane1.png';
         plane.id = 'fly-plane';
@@ -192,8 +240,71 @@
           requestAnimationFrame(animatePlane);
         }
         animatePlane();
+
+        // === ここから中間点に飛行機とTimeを表示 ===
+        // 中間点計算
+        const midLng = (reitakuLngLat[0] + destLngLat[0]) / 2;
+        const midLat = (reitakuLngLat[1] + destLngLat[1]) / 2;
+
+        // 飛行機画像
+        const midPlane = document.createElement('img');
+        midPlane.src = 'plane1.png';
+        midPlane.id = 'mid-plane';
+        midPlane.style.position = 'fixed';
+        midPlane.style.width = '38px';
+        midPlane.style.height = '38px';
+        midPlane.style.zIndex = 4100;
+        midPlane.style.pointerEvents = 'none';
+
+        // 黒いMAP（ダークマター）の時は画像を反転
+        const style = map.getStyle();
+        if (
+          (style.sprite && style.sprite.includes('dark-matter')) ||
+          (style.sources && JSON.stringify(style.sources).includes('dark-matter')) ||
+          (style.name && style.name.toLowerCase().includes('dark'))
+        ) {
+          midPlane.style.filter = 'invert(1)';
+        } else {
+          midPlane.style.filter = '';
+        }
+
+        // Time表示
+        const midTime = document.createElement('div');
+        midTime.id = 'mid-time';
+        midTime.textContent = u.Time ? `Time: ${u.Time}` : '';
+        midTime.style.position = 'fixed';
+        midTime.style.color = '#a6192e';
+        midTime.style.background = '#fff';
+        midTime.style.fontSize = '15px';
+        midTime.style.fontWeight = 'bold';
+        midTime.style.padding = '2px 10px';
+        midTime.style.borderRadius = '12px';
+        midTime.style.boxShadow = '0 2px 8px #0002';
+        midTime.style.zIndex = 4101;
+        midTime.style.pointerEvents = 'none';
+        midTime.style.whiteSpace = 'nowrap';
+
+        function setMidPlanePosition() {
+          const midPoint = map.project([midLng, midLat]);
+          midPlane.style.left = `${midPoint.x - 19}px`;
+          midPlane.style.top = `${midPoint.y - 19}px`;
+          // Timeを飛行機画像の右隣に配置
+          midTime.style.left = `${midPoint.x + 25}px`;
+          midTime.style.top = `${midPoint.y - 10}px`;
+        }
+        setMidPlanePosition();
+        document.body.appendChild(midPlane);
+        document.body.appendChild(midTime);
+
+        map.on('move', setMidPlanePosition);
+        map.on('zoom', setMidPlanePosition);
+      } else {
+        // Reitaku University選択時は飛行機・Timeを消す
+        const oldMidPlane = document.getElementById('mid-plane');
+        if (oldMidPlane) oldMidPlane.remove();
+        const oldMidTime = document.getElementById('mid-time');
+        if (oldMidTime) oldMidTime.remove();
       }
-      // --- ここまで飛行機アニメーション ---
 
       // ピン画像リセット
       document.querySelectorAll('.univ-marker-img').forEach(img => {
@@ -231,4 +342,66 @@
          <div class="univ-lang">主に使われる言語：${u.language||"不明"}</div>
          ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
             `<div class="univ-link">
-            
+               <a href="${u.URL.trim()}" target="_blank">ホームページはこちらから</a>
+             </div>` : ""}
+         <button id="zoom-to-univ" class="univ-btn">Zoom in</button>
+         <button id="close-univ-info" class="univ-close">×</button>`;
+
+      // --- ここから追加 ---
+      const zoomBtn = document.getElementById('zoom-to-univ');
+      let prevCenter = map.getCenter();
+      let prevZoom = map.getZoom();
+
+      zoomBtn.onclick = function zoomInHandler() {
+        prevCenter = map.getCenter();
+        prevZoom = map.getZoom();
+        map.flyTo({
+          center: [u.lng, u.lat],
+          zoom: 13,
+          speed: 1.2,
+          curve: 1.4,
+          essential: true
+        });
+        zoomBtn.textContent = "Zoom out";
+        zoomBtn.onclick = function zoomOutHandler() {
+          map.flyTo({
+            center: prevCenter,
+            zoom: prevZoom,
+            speed: 1.2,
+            curve: 1.4,
+            essential: true
+          });
+          zoomBtn.textContent = "Zoom in";
+          zoomBtn.onclick = zoomInHandler;
+        };
+      };
+      // --- ここまで追加 ---
+    }
+    // ...既存コード...
+
+    window.addEventListener('DOMContentLoaded', function() {
+      const splash = document.getElementById('splash');
+      setTimeout(() => {
+        splash.classList.add('hide');
+      }, 1200);
+
+      // すべての地域を選択状態にする
+      document.querySelectorAll('.region-checkbox').forEach(cb => cb.checked = true);
+    });
+
+    // 地域フィルターのチェックボックスにイベントを追加
+    document.querySelectorAll('.region-checkbox').forEach(cb => {
+      cb.addEventListener('change', function() {
+        showMarkersByRegion(getSelectedRegions());
+      });
+    });
+
+    // 「すべて選択」チェックボックス
+    document.getElementById('region-all').addEventListener('change', function(e) {
+      const checked = e.target.checked;
+      document.querySelectorAll('.region-checkbox').forEach(cb => cb.checked = checked);
+      showMarkersByRegion(getSelectedRegions());
+    });
+  </script>
+</body>
+</html>
