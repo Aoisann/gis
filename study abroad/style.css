@@ -84,41 +84,64 @@ html, body {
 }
 
 /* ベースマップ選択 */
+/* ベースMAP選択ボックス */
 #basemap-box {
-  position: fixed;
-  z-index: 2000;
-  top: 10px; right: 10px;
-  background: rgba(245,245,245,0.97);
-  padding: 6px 12px 10px 12px;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-  font-size: 15px;
+  position: absolute;
+  top: 18px;
+  right: 28px;
+  background: #a6192e;
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  box-shadow: 0 2px 8px #0002;
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 13px;
+  z-index: 3100;
 }
 #basemap-box label {
-  font-size: 14px;
-  background: #e0e0e0;
-  padding: 4px 8px;
-  border-radius: 6px;
+  margin-right: 8px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+#basemap-select {
+  background: #fff;
+  color: #a6192e;
+  border: 2px solid #a6192e;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 13px;
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+#basemap-select:focus {
+  outline: none;
+  border-color: #8a1626;
 }
 
 /* 地域フィルター */
 #region-legend {
-  position: fixed;
-  z-index: 2000;
-  top: 62px; right: 10px;
-  background: rgba(245,245,245,0.97);
-  padding: 6px 10px 10px 10px;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-  font-size: 15px;
-  line-height: 1.7;
-}
-#region-legend > div:first-child {
-  margin-bottom: 4px;
-  font-size: 14px;
-  background: #e0e0e0;
-  padding: 4px 8px;
+  position: absolute;
+  top: 70px;
+  right: 28px;
+  background: #fff;
   border-radius: 6px;
+  box-shadow: 0 2px 8px #0002;
+  padding: 7px 10px 7px 10px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13px;
+  z-index: 3090;
+  min-width: 140px;
+}
+#region-legend > div {
+  color: #a6192e;
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 6px;
+  font-style: italic;
 }
 #region-filters {
   margin-bottom: 6px;
@@ -129,20 +152,39 @@ html, body {
 #region-filters label {
   display: flex;
   align-items: center;
-  margin-top: 2px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+#region-filters input[type="checkbox"] {
+  accent-color: #a6192e;
+  width: 15px;
+  height: 15px;
+  margin-right: 6px;
+}
+#region-filters .region-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+  vertical-align: middle;
+  border-radius: 4px;
+  border: 1px solid #a6192e;
+  background: #fff;
+  box-shadow: 0 1px 4px #0001;
 }
 .region-checkbox,
 #region-all {
   margin-right: 4px;
 }
 .region-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
+  margin-right: 6px;
   vertical-align: middle;
-  margin-right: 2px;
-  border-radius: 50%;
-  border: 1px solid #fff;
+  border-radius: 3px;
   background: #fff;
+  border: 1px solid #a6192e;
+  box-shadow: 0 1px 4px #0001;
 }
 
 /* 大学ピン画像 */
@@ -357,6 +399,40 @@ html, body {
   color: #a6192e;
   border: 2px solid #a6192e;
   text-decoration: underline;
+}
+
+/* ベースMAP選択・フィルターのフォントを標準に戻す */
+#basemap-box,
+#basemap-select,
+#region-legend,
+#region-legend > div,
+#region-filters label,
+#region-filters input[type="checkbox"],
+#region-filters .region-icon {
+  font-family: inherit;
+  font-style: normal;
+}
+
+/* ベースMAP選択・フィルターの文字色をグレーに */
+#basemap-box,
+#basemap-box label,
+#basemap-select,
+#region-legend,
+#region-legend > div,
+#region-filters label {
+  color: #555;
+}
+
+/* ベースMAP選択ボックスの文字色だけ白に */
+#basemap-box,
+#basemap-box label,
+#basemap-select {
+  color: #fff !important;
+}
+
+/* ベースMAP選択候補（option）の文字色をグレーに */
+#basemap-select option {
+  color: #555;
 }
 
 /* その他必要に応じて追加 */
