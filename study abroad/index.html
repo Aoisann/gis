@@ -53,6 +53,17 @@
       </label>
     </div>
   </div>
+  <!-- 言語フィルターの追加 -->
+  <div id="language-legend">
+    <div>Language Filter</div>
+    <div id="language-filters">
+      <label><input type="checkbox" class="language-checkbox" value="English" checked>英語</label>
+      <label><input type="checkbox" class="language-checkbox" value="German" checked>ドイツ語</label>
+      <label><input type="checkbox" class="language-checkbox" value="Chinese" checked>中国語</label>
+      <label><input type="checkbox" class="language-checkbox" value="Korean" checked>韓国語</label>
+      <label><input type="checkbox" class="language-checkbox" value="Other" checked>その他</label>
+    </div>
+  </div>
   <!-- 検索ボックスをHTMLに追加 -->
   <div id="search-box">
     <input id="search-input" type="text" placeholder="大学名で検索">
@@ -130,12 +141,33 @@
       return Array.from(document.querySelectorAll('.region-checkbox:checked')).map(e => e.value);
     }
 
+    // 言語フィルターの値取得
+    function getSelectedLanguages() {
+      return Array.from(document.querySelectorAll('.language-checkbox:checked')).map(e => e.value);
+    }
+
     // ピン表示
-    function showMarkersByRegion(selectedRegions) {
+    function showMarkersByRegion(selectedRegions, selectedLanguages) {
       allMarkers.forEach(m => m.remove());
       allMarkers = [];
       universityList.forEach(u => {
+        // 地域と言語両方でフィルタ
+        let lang = u.language;
         if (!selectedRegions.includes(u.region)) return;
+        // 言語フィルター
+        if (selectedLanguages) {
+          if (
+            (selectedLanguages.includes('English') && lang.includes('英語')) ||
+            (selectedLanguages.includes('German') && lang.includes('ドイツ語')) ||
+            (selectedLanguages.includes('Chinese') && lang.includes('中国語')) ||
+            (selectedLanguages.includes('Korean') && lang.includes('韓国語')) ||
+            (selectedLanguages.includes('Other') && !['英語','ドイツ語','中国語','韓国語'].some(l=>lang.includes(l)))
+          ) {
+            // 表示
+          } else {
+            return;
+          }
+        }
         // 緯度経度が数値でなければスキップ
         if (isNaN(u.lng) || isNaN(u.lat)) return;
         // ピン画像要素を毎回生成
@@ -402,6 +434,16 @@
       document.querySelectorAll('.region-checkbox').forEach(cb => cb.checked = checked);
       showMarkersByRegion(getSelectedRegions());
     });
+
+    // 言語フィルターのチェックボックスにイベントを追加
+    document.querySelectorAll('.language-checkbox').forEach(cb => {
+      cb.addEventListener('change', function() {
+        showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
+      });
+    });
+
+    // 初期表示時
+    showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
   </script>
 </body>
 </html>

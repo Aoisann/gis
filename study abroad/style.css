@@ -435,4 +435,118 @@ html, body {
   color: #555;
 }
 
+/* 言語フィルターのデザイン */
+#language-legend {
+  position: absolute;
+  top: 220px;
+  right: 28px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px #0002;
+  padding: 7px 10px 7px 10px;
+  font-size: 13px;
+  z-index: 3080;
+  min-width: 140px;
+}
+#language-legend > div {
+  color: #a6192e;
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 6px;
+  font-style: italic;
+}
+#language-filters label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+#language-filters input[type="checkbox"] {
+  accent-color: #a6192e;
+  width: 15px;
+  height: 15px;
+  margin-right: 6px;
+}
+
+/* 地域・言語フィルターを横並びにするための調整 */
+#region-legend, #language-legend {
+  position: static;
+  margin: 0;
+  min-width: 140px;
+  box-shadow: 0 2px 8px #0002;
+  border-radius: 6px;
+  background: #fff;
+  padding: 7px 10px 7px 10px;
+  font-size: 13px;
+}
+
+/* 地域・言語フィルターのデザインを統一 */
+#region-legend,
+#language-legend {
+  position: absolute;
+  top: 70px;
+  right: auto;
+  left: auto;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px #0002;
+  padding: 10px 16px;
+  font-size: 14px;
+  z-index: 3090;
+  min-width: 160px;
+  margin-right: 0;
+  margin-left: 0;
+  display: inline-block;
+}
+
+#region-legend > div,
+#language-legend > div {
+  color: #a6192e;
+  font-weight: bold;
+  font-size: 15px;
+  margin-bottom: 8px;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+#region-filters label,
+#language-filters label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+}
+
+#region-filters input[type="checkbox"],
+#language-filters input[type="checkbox"] {
+  accent-color: #a6192e;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+#region-filters .region-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 4px;
+  border: 1px solid #a6192e;
+  background: #fff;
+  box-shadow: 0 1px 4px #0001;
+}
+
+/* 横並びにする場合の親要素 */
+.filter-container {
+  display: flex;
+  gap: 18px;
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 3090;
+}
+
 /* その他必要に応じて追加 */
