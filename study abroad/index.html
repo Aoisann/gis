@@ -23,45 +23,50 @@
       <option value="dark">Dark Matter</option>
     </select>
   </div>
-  <!-- 地域フィルター（ベースマップ選択の直下） -->
-  <div id="region-legend">
-    <div>Filter by Region:</div>
-    <div id="region-filters">
-      <label>
-        <input type="checkbox" id="region-all" checked>Show All
-      </label>
-      <label>
-        <input type="checkbox" class="region-checkbox" value="North America" checked>
-        <img src="R-blue.png" class="region-icon">North America
-      </label>
-      <label>
-        <input type="checkbox" class="region-checkbox" value="Asia" checked>
-        <img src="R-purple.png" class="region-icon">Asia
-      </label>
-      <label>
-        <input type="checkbox" class="region-checkbox" value="Europe" checked>
-        <img src="R-blue2.png" class="region-icon">Europe
-      </label>
-      <label>
-        <input type="checkbox" class="region-checkbox" value="Oceania" checked>
-        <img src="R-orenge.png" class="region-icon">Oceania
-      </label>
-      <!-- Add Reitaku University to region filter -->
-      <label>
-        <input type="checkbox" class="region-checkbox" value="Reitaku University" checked>
-        <img src="R透過.png" class="region-icon">Reitaku University
-      </label>
+  <div class="filter-container">
+    <div id="region-legend">
+      <button class="filter-toggle" data-target="region-filters">☑</button>
+      <div>Filter by Region:</div>
+      <div id="region-filters">
+        <label>
+          <input type="checkbox" id="region-all" checked>Show All
+        </label>
+        <label>
+          <input type="checkbox" class="region-checkbox" value="North America" checked>
+          <img src="R-blue.png" class="region-icon">North America
+        </label>
+        <label>
+          <input type="checkbox" class="region-checkbox" value="Asia" checked>
+          <img src="R-purple.png" class="region-icon">Asia
+        </label>
+        <label>
+          <input type="checkbox" class="region-checkbox" value="Europe" checked>
+          <img src="R-blue2.png" class="region-icon">Europe
+        </label>
+        <label>
+          <input type="checkbox" class="region-checkbox" value="Oceania" checked>
+          <img src="R-orenge.png" class="region-icon">Oceania
+        </label>
+        <!-- Add Reitaku University to region filter -->
+        <label>
+          <input type="checkbox" class="region-checkbox" value="Reitaku University" checked>
+          <img src="R透過.png" class="region-icon">Reitaku University
+        </label>
+      </div>
     </div>
-  </div>
-  <!-- 言語フィルターの追加 -->
-  <div id="language-legend">
-    <div>Language Filter</div>
-    <div id="language-filters">
-      <label><input type="checkbox" class="language-checkbox" value="English" checked>英語</label>
-      <label><input type="checkbox" class="language-checkbox" value="German" checked>ドイツ語</label>
-      <label><input type="checkbox" class="language-checkbox" value="Chinese" checked>中国語</label>
-      <label><input type="checkbox" class="language-checkbox" value="Korean" checked>韓国語</label>
-      <label><input type="checkbox" class="language-checkbox" value="Other" checked>その他</label>
+    <div id="language-legend">
+      <button class="filter-toggle" data-target="language-filters">☑</button>
+      <div>Language Filter</div>
+      <div id="language-filters">
+        <label>
+          <input type="checkbox" id="language-all" checked>全て
+        </label>
+        <label><input type="checkbox" class="language-checkbox" value="English" checked>英語</label>
+        <label><input type="checkbox" class="language-checkbox" value="German" checked>ドイツ語</label>
+        <label><input type="checkbox" class="language-checkbox" value="Chinese" checked>中国語</label>
+        <label><input type="checkbox" class="language-checkbox" value="Korean" checked>韓国語</label>
+        <label><input type="checkbox" class="language-checkbox" value="Other" checked>その他</label>
+      </div>
     </div>
   </div>
   <!-- 検索ボックスをHTMLに追加 -->
@@ -438,6 +443,44 @@
     // 言語フィルターのチェックボックスにイベントを追加
     document.querySelectorAll('.language-checkbox').forEach(cb => {
       cb.addEventListener('change', function() {
+        showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
+      });
+    });
+
+    // フィルターボタンのクリックイベント
+    document.querySelectorAll('.filter-toggle').forEach(btn => {
+      const targetId = btn.getAttribute('data-target');
+      const target = document.getElementById(targetId);
+      // 最初は閉じた状態にする
+      target.style.display = 'none';
+      btn.textContent = '☑';
+      btn.classList.add('closed');
+
+      btn.addEventListener('click', function() {
+        if (target.style.display === 'none') {
+          target.style.display = '';
+          btn.textContent = '✕'; // 開いているときは「×」
+          btn.classList.remove('closed');
+        } else {
+          target.style.display = 'none';
+          btn.textContent = '☑'; // 閉じているときは「☑」
+          btn.classList.add('closed');
+        }
+      });
+    });
+
+    // 「全て」チェックボックス（言語フィルター）
+    document.getElementById('language-all').addEventListener('change', function(e) {
+      const checked = e.target.checked;
+      document.querySelectorAll('.language-checkbox').forEach(cb => cb.checked = checked);
+      showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
+    });
+
+    // 言語フィルターの個別チェックボックスで「全て」の状態を制御
+    document.querySelectorAll('.language-checkbox').forEach(cb => {
+      cb.addEventListener('change', function() {
+        const allChecked = Array.from(document.querySelectorAll('.language-checkbox')).every(cb => cb.checked);
+        document.getElementById('language-all').checked = allChecked;
         showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
       });
     });
