@@ -46,6 +46,12 @@ html, body {
   visibility: hidden;
   transform: translateX(-100vw); /* 左にスライドして消える */
 }
+#splash.slide-hide {
+  transition: transform 0.7s cubic-bezier(.77,0,.18,1), opacity 0.5s;
+  transform: translateX(-100vw);
+  opacity: 0;
+  pointer-events: none;
+}
 #splash > div {
   position: relative;
   width: 100vw; height: 100vh;
@@ -202,6 +208,31 @@ html, body {
   position: fixed;
   left: 0;
   bottom: 0;
+  top: auto;
+  width: 340px;           /* パネル本体を少し小さめに */
+  max-width: 90vw;
+  height: 60vh;
+  background: #fff;
+  border-radius: 0 18px 18px 0;
+  box-shadow: 4px 0 24px #0003;
+  z-index: 4200;
+  transform: translateX(0);
+  transition: transform 0.4s cubic-bezier(.77,0,.18,1);
+  overflow: hidden !important;
+  scrollbar-width: none !important;      /* Firefox */
+  -ms-overflow-style: none !important;   /* IE/Edge */
+  padding: 4px 8px 4px 8px;
+}
+
+/* パネルを閉じたときの位置も調整 */
+#univ-info.closed {
+  transform: translateX(-340px);
+}
+
+#univ-info {
+  position: fixed;
+  left: 0;
+  bottom: 0;
   height: 50vh;
   width: 250px;
   transform: translateX(0);
@@ -209,11 +240,64 @@ html, body {
   background: rgba(60, 60, 60, 0.7); /* 透明のグレー */
   box-shadow: 2px 0 12px rgba(0,0,0,0.13);
   z-index: 3000;
-  overflow-y: auto;
-  border-top-right-radius: 12px;
-  border-bottom-right-radius: 12px;
-  padding: 24px 20px 20px 20px;
-  font-size: 15px;
+  overflow: hidden !important;
+  scrollbar-width: none !important;      /* Firefox */
+  -ms-overflow-style: none !important;   /* IE/Edge */
+}
+#univ-info::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+/* 大学情報パネルのスライド・トグルボタン */
+.univ-info-toggle {
+  position: absolute;
+  top: 50%;
+  right: -32px;           /* パネルからはみ出す距離を拡大 */
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  color: #a6192e;
+  font-size: 32px;
+  cursor: pointer;
+  z-index: 9999; /* パネルより上に表示 */
+  box-shadow: 0 4px 16px #0003;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: right 0.4s, box-shadow 0.2s;
+}
+.univ-info-toggle:hover {
+  box-shadow: 0 8px 24px #a6192e33;
+  background: #ffeaea;
+}
+#univ-info.closed {
+  transform: translateX(-340px);
+}
+
+#univ-info {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  height: 50vh;
+  width: 250px;
+  transform: translateX(0);
+  transition: transform 0.4s cubic-bezier(.77,0,.18,1);
+  background: rgba(60, 60, 60, 0.7); /* 透明のグレー */
+  box-shadow: 2px 0 12px rgba(0,0,0,0.13);
+  z-index: 3000;
+  overflow: hidden !important;
+  scrollbar-width: none !important;      /* Firefox */
+  -ms-overflow-style: none !important;   /* IE/Edge */
+}
+#univ-info::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }
 
 /* タイトル */
@@ -320,21 +404,6 @@ html, body {
   text-decoration: underline;
 }
 
-/* 閉じるボタン */
-#univ-info .univ-close {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  background: rgba(0,0,0,0.12);
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 22px;
-  color: #fff;
-  cursor: pointer;
-}
-
 /* 検索ボックス（もし再利用する場合） */
 #search-box {
   position: fixed;
@@ -345,7 +414,15 @@ html, body {
   padding: 8px 14px 12px 14px;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.13);
-  width: 220px;
+  width: 220px;  #basemap-box,
+  #basemap-box label,
+  #basemap-select {
+    color: #512f2f !important;
+  }  #basemap-box,
+  #basemap-box label,
+  #basemap-select {
+    color: #fff !important;
+  }
 }
 #search-input {
   width: 100%;
@@ -618,4 +695,14 @@ html, body {
     font-size: 12px;
     padding: 6px 4px 6px 6px;
   }
+}
+
+/* スクロールバーの左右の矢印（＜ ＞）を非表示にする */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* 大学情報パネルの余白をさらに小さくする */
+#univ-info {
+  padding: 4px 8px 4px 8px;
 }

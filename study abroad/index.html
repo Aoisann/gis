@@ -69,11 +69,13 @@
       </div>
     </div>
   </div>
-  <!-- 検索ボックスをHTMLに追加 -->
+  <!-- 検索ボックス部分を削除してください -->
+  <!--
   <div id="search-box">
     <input id="search-input" type="text" placeholder="大学名で検索">
     <div id="univ-list"></div>
   </div>
+  -->
   <div id="map"></div>
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
   <script>
@@ -371,55 +373,51 @@
       } else {
         infoDiv.style.transform = 'translateX(0)';
       }
-      infoDiv.innerHTML =
-        `<div class="univ-title">${u.name}</div>
-         <div class="univ-ename">${u["english name"]||""}</div>
-         <div class="univ-country">${u.country||""}</div>
-         ${u.country ? `<div class="univ-flag"><img src="flags/${u.country.trim()}.png" alt="${u.country}"></div>` : ""}
-         <div class="univ-lang">主に使われる言語：${u.language||"不明"}</div>
-         ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
+      infoDiv.innerHTML = `
+        <div class="univ-info-content">
+          <div class="univ-title">${u.name}</div>
+          <div class="univ-ename">${u["english name"]||""}</div>
+          <div class="univ-country">${u.country||""}</div>
+          ${u.country ? `<div class="univ-flag"><img src="flags/${u.country.trim()}.png" alt="${u.country}"></div>` : ""}
+          <div class="univ-lang">主に使われる言語：${u.language||"不明"}</div>
+          ${u.URL && u.URL.trim() && (u.URL.trim().startsWith('http://') || u.URL.trim().startsWith('https://')) ?
             `<div class="univ-link">
-               <a href="${u.URL.trim()}" target="_blank">ホームページはこちらから</a>
-             </div>` : ""}
-         <button id="zoom-to-univ" class="univ-btn">Zoom in</button>
-         <button id="close-univ-info" class="univ-close">×</button>`;
+              <a href="${u.URL.trim()}" target="_blank" rel="noopener noreferrer">ホームページはこちらから</a>
+            </div>` : ""}
+          <button id="zoom-to-univ" class="univ-btn">Zoom in</button>
+        </div>
+      `;
 
-      // --- ここから追加 ---
+      // Zoom in/out機能はそのまま
       const zoomBtn = document.getElementById('zoom-to-univ');
-      let prevCenter = map.getCenter();
-      let prevZoom = map.getZoom();
-
-      zoomBtn.onclick = function zoomInHandler() {
-        prevCenter = map.getCenter();
-        prevZoom = map.getZoom();
-        map.flyTo({
-          center: [u.lng, u.lat],
-          zoom: 13,
-          speed: 1.2,
-          curve: 1.4,
-          essential: true
-        });
-        zoomBtn.textContent = "Zoom out";
-        zoomBtn.onclick = function zoomOutHandler() {
+      if (zoomBtn) {
+        zoomBtn.onclick = function() {
           map.flyTo({
-            center: prevCenter,
-            zoom: prevZoom,
-            speed: 1.2,
-            curve: 1.4,
-            essential: true
+            center: [u.lng, u.lat],
+            zoom: 7,
+            speed: 1.2
           });
-          zoomBtn.textContent = "Zoom in";
-          zoomBtn.onclick = zoomInHandler;
+          zoomBtn.textContent = 'Zoom out';
+          zoomBtn.id = 'zoom-out-univ';
+          zoomBtn.onclick = function() {
+            map.flyTo({
+              center: [15, 30],
+              zoom: 1.2,
+              speed: 1.2
+            });
+            zoomBtn.textContent = 'Zoom in';
+            zoomBtn.id = 'zoom-to-univ';
+            zoomBtn.onclick = arguments.callee;
+          };
         };
-      };
-      // --- ここまで追加 ---
+      }
     }
     // ...既存コード...
 
     window.addEventListener('DOMContentLoaded', function() {
       const splash = document.getElementById('splash');
       setTimeout(() => {
-        splash.classList.add('hide');
+        splash.classList.add('slide-hide');
       }, 1200);
 
       // すべての地域を選択状態にする
