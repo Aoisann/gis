@@ -546,7 +546,8 @@ html, body {
   position: fixed;
   right: 28px;
   bottom: 28px;
-  z-index: 3090;
+  z-index: 9999; /* ←十分大きく */
+  background: none;
 }
 
 /* その他必要に応じて追加 */
