@@ -70,8 +70,52 @@
     </div>
   </div>
 
+
   <div id="map"></div>
+  <div id="help-btn">?</div>
+  <div id="help-modal" style="display:none;">
+    <div class="help-content">
+      <button id="help-close">&times;</button>
+      <h2>このサイトの使い方</h2>
+      <ul>
+        <li>地図上のピンをクリックすると大学情報が表示されます。</li>
+        <li>
+          <button class="univ-btn" style="pointer-events:none; background:#a6192e; color:#fff; border-radius:6px; font-size:1em; padding:2px 10px; min-width:0; border:none; margin-right:6px; vertical-align:middle;">Zoom in</button>
+          ボタンで大学周辺にズームできます。
+        </li>
+        <li>
+          <button class="univ-btn" style="pointer-events:none; background:#fff; color:#a6192e; border-radius:6px; font-size:1em; padding:2px 10px; min-width:0; border:2px solid #a6192e; margin-right:6px; vertical-align:middle;">Zoom out</button>
+          ボタンで全体地図に戻ります。
+        </li>
+        <li>
+          右上の
+          <select id="basemap-select" style="pointer-events:none; background:#fff; color:#a6192e; border:2px solid #a6192e; border-radius:4px; padding:2px 8px; font-size:1em; font-family:'Times New Roman', Times, serif; font-style:italic; font-weight:bold; vertical-align:middle;">
+            <option>White</option>
+            <option>Dark Matter</option>
+          </select>
+          で地図の色を切り替えられます。
+        </li>
+        <li>
+          左側の
+          <button class="filter-toggle" style="pointer-events:none; font-size:1em; padding:2px 8px; vertical-align:middle;">☑</button>
+          フィルターで地域や言語で絞り込みできます。
+        </li>
+        <li>
+          <img src="plane1.png" alt="Flight Time" style="width:22px; height:22px; vertical-align:middle; margin-right:6px;">
+          <strong style="color:#a6192e;">Flight Time</strong>は、麗澤大学からその大学まで飛行機でどれくらいかかるかの目安時間です。
+        </li>
+      </ul>
+    </div>
+  </div>
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
   <script src="main.js"></script>
+  <script>
+  document.getElementById('help-btn').onclick = function() {
+    document.getElementById('help-modal').style.display = 'block';
+  };
+  document.getElementById('help-close').onclick = function() {
+    document.getElementById('help-modal').style.display = 'none';
+  };
+  </script>
 </body>
 </html>

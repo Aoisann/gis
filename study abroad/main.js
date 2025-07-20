@@ -11,6 +11,7 @@ let map = new maplibregl.Map({
   center: [15, 30],
   zoom: 1.2
 });
+window.map = map;
 
 // 地域アイコン
 const regionIcon = {

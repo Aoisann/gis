@@ -398,7 +398,6 @@ html, body {
   text-decoration: none;
   cursor: pointer;
 }
-
 #univ-info .univ-link a:hover {
   background: #8a1626;
   color: #fff;
@@ -505,7 +504,7 @@ html, body {
 #basemap-box,
 #basemap-box label,
 #basemap-select {
-  color: #fff !important;
+  color: #e7a0a0 !important;
 }
 
 /* ベースMAP選択候補（option）の文字色をグレーに */
@@ -680,53 +679,90 @@ html, body {
   flex: 1;
 }
 
-/* スマホ・狭い画面対応 */
-@media (max-width: 700px) {
-  .filter-container {
-    top: 10px;
-    right: 2vw;
-    max-width: 98vw;
-    flex-direction: column;
-    gap: 8px;
-  }
-  #region-legend,
-  #language-legend {
-    max-width: 98vw;
-    min-width: 0;
-    font-size: 12px;
-    padding: 6px 4px 6px 6px;
-  }
+/* 右下の?ボタン */
+#help-btn {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 48px;
+  height: 48px;
+  background: #a6192e;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 48px;
+  cursor: pointer;
+  z-index: 9999;
+  box-shadow: 0 4px 16px #0003;
 }
 
-/* スクロールバーの左右の矢印（＜ ＞）を非表示にする */
-::-webkit-scrollbar-button {
-  display: none;
+/* ヘルプモーダル */
+#help-modal {
+  position: fixed;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-/* 大学情報パネルの余白をさらに小さくする */
-#univ-info {
-  padding: 4px 8px 4px 8px;
-}
-
-/* Base Map:ラベルは白色、現在表示中MAP名はグレー */
-#basemap-box label {
-  color: #fff !important;
-}
-
-/* 今表示されているMAP名（inputやspanなど）をグレーに */
-#current-basemap-name {
-  color: #555 !important;
+#help-modal .help-content {
   background: #fff;
-  border: 2px solid #a6192e;
-  border-radius: 4px;
-  padding: 3px 8px;
-  font-size: 13px;
-  margin-left: 8px;
+  border-radius: 16px;
+  padding: 32px 24px 24px 24px;
+  max-width: 340px;
+  box-shadow: 0 8px 32px #0004;
+  position: relative;
+  margin: auto; /* 画面中央に配置 */
+}
+#help-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: #a6192e;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  cursor: pointer;
 }
 
-/* ベースMAP選択ボックス・ラベル・セレクトの文字色を薄い赤（#dba2a2）に */
-#basemap-box,
-#basemap-box label,
-#basemap-select {
-  color: #dba2a2 !important;
+#region-pin-bar {
+  position: fixed;
+  top: 18px;
+  left: 28px;
+  z-index: 9999;
+  display: flex;
+  gap: 10px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #0002;
+  padding: 8px 14px;
+}
+
+.region-pin-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: box-shadow 0.2s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.region-pin-btn:hover {
+  box-shadow: 0 0 8px #a6192e55;
+  background: #ffeaea;
+}
+.region-pin-img {
+  width: 32px;
+  height: 32px;
+  display: block;
 }
