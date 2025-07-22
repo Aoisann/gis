@@ -107,13 +107,15 @@ function showMarkersByRegion(selectedRegions, selectedLanguages) {
 }
 
 function handleUnivPinClick(u, el) {
-  // --- 既存の飛行機・Time要素を必ず消す ---
+  // --- 既存の飛行機・Time要素・軌跡を必ず消す ---
   const oldPlane = document.getElementById('fly-plane');
   if (oldPlane) oldPlane.remove();
   const oldMidPlane = document.getElementById('mid-plane');
   if (oldMidPlane) oldMidPlane.remove();
   const oldMidTime = document.getElementById('mid-time');
   if (oldMidTime) oldMidTime.remove();
+  const oldPath = document.getElementById('fly-path');
+  if (oldPath) oldPath.remove();
 
   // --- 飛行機アニメーション（麗澤大学以外のみ） ---
   if (u.region !== "Reitaku University") {
@@ -121,6 +123,51 @@ function handleUnivPinClick(u, el) {
     const destLngLat = [u.lng, u.lat];
     const reitakuPoint = map.project(reitakuLngLat);
     const destPoint = map.project(destLngLat);
+
+    // SVGで軌跡を描画
+    let svg = document.getElementById('fly-path');
+    if (svg) svg.remove();
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('id', 'fly-path');
+    svg.style.position = 'fixed';
+    svg.style.left = '0';
+    svg.style.top = '0';
+    svg.style.width = '100vw';
+    svg.style.height = '100vh';
+    svg.style.pointerEvents = 'none';
+    svg.style.zIndex = 3999;
+
+    // ベジェ曲線の制御点
+    const dx = destPoint.x - reitakuPoint.x;
+    const dy = destPoint.y - reitakuPoint.y;
+    const curveStrength = 0.18;
+    const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
+    const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
+
+    // SVGパス
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#a6192e');
+    path.setAttribute('stroke-width', '3');
+    path.setAttribute('stroke-opacity', '0.7');
+    path.setAttribute('stroke-dasharray', '6,6');
+    path.setAttribute('id', 'fly-path-line');
+
+    // パスのd属性をセット
+    function setPathD() {
+      const rp = map.project(reitakuLngLat);
+      const dp = map.project(destLngLat);
+      const cpx = (rp.x + dp.x) / 2 - ((dp.y - rp.y) * curveStrength);
+      const cpy = (rp.y + dp.y) / 2 + ((dp.x - rp.x) * curveStrength);
+      path.setAttribute('d', `M${rp.x},${rp.y} Q${cpx},${cpy} ${dp.x},${dp.y}`);
+      svg.setAttribute('width', window.innerWidth);
+      svg.setAttribute('height', window.innerHeight);
+    }
+    setPathD();
+    svg.appendChild(path);
+    document.body.appendChild(svg);
+
+    // 飛行機画像
     const plane = document.createElement('img');
     plane.src = 'plane1.png';
     plane.id = 'fly-plane';
@@ -132,12 +179,7 @@ function handleUnivPinClick(u, el) {
     plane.style.zIndex = 4000;
     plane.style.pointerEvents = 'none';
     plane.style.transition = 'none';
-    let dx = destPoint.x - reitakuPoint.x;
-    let dy = destPoint.y - reitakuPoint.y;
-    if (Math.abs(dx) > window.innerWidth / 2) {
-      dx = dx > 0 ? dx - window.innerWidth : dx + window.innerWidth;
-    }
-    const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+
     let filter = '';
     if (map.getStyle().sprite && map.getStyle().sprite.includes('dark-matter')) {
       filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
@@ -153,20 +195,23 @@ function handleUnivPinClick(u, el) {
       filter = 'invert(1) drop-shadow(0 4px 12px #fff6)';
     }
     plane.style.filter = filter;
+
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
     if (u.region === "North America") {
       plane.style.transform = `rotate(${angle}deg) scaleY(-1)`;
     } else {
       plane.style.transform = `rotate(${angle}deg)`;
     }
     document.body.appendChild(plane);
-    const frames = 90;
-    let frame = 0;
-    const curveStrength = 0.18;
-    const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
-    const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
+
+    // ベジェ曲線関数
     function bezier(t, p0, p1, p2) {
       return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
     }
+
+    // 飛行機アニメーション
+    const frames = 90;
+    let frame = 0;
     function animatePlane() {
       frame++;
       const t = frame / frames;
@@ -174,8 +219,14 @@ function handleUnivPinClick(u, el) {
         plane.remove();
         return;
       }
-      const x = bezier(t, reitakuPoint.x, cx, destPoint.x);
-      const y = bezier(t, reitakuPoint.y, cy, destPoint.y);
+      // 現在のパス座標を再計算
+      const rp = map.project(reitakuLngLat);
+      const dp = map.project(destLngLat);
+      const cpx = (rp.x + dp.x) / 2 - ((dp.y - rp.y) * curveStrength);
+      const cpy = (rp.y + dp.y) / 2 + ((dp.x - rp.x) * curveStrength);
+      // 飛行機の位置
+      const x = bezier(t, rp.x, cpx, dp.x);
+      const y = bezier(t, rp.y, cpy, dp.y);
       const scale = 1 + 0.3 * Math.sin(Math.PI * t);
       if (u.region === "North America") {
         plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${scale})`;
@@ -188,6 +239,14 @@ function handleUnivPinClick(u, el) {
       requestAnimationFrame(animatePlane);
     }
     animatePlane();
+
+    // 地図移動時に軌跡も再描画
+    function updatePathAndMid() {
+      setPathD();
+      setMidPlanePosition();
+    }
+    map.on('move', updatePathAndMid);
+    map.on('zoom', updatePathAndMid);
 
     // === ここから中間点に飛行機とTimeを表示 ===
     const midLng = (reitakuLngLat[0] + destLngLat[0]) / 2;
@@ -249,6 +308,8 @@ function handleUnivPinClick(u, el) {
     if (oldMidPlane) oldMidPlane.remove();
     const oldMidTime = document.getElementById('mid-time');
     if (oldMidTime) oldMidTime.remove();
+    const oldPath = document.getElementById('fly-path');
+    if (oldPath) oldPath.remove();
   }
 
   document.querySelectorAll('.univ-marker-img').forEach(img => {
