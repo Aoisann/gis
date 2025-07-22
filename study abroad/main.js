@@ -433,5 +433,40 @@ document.querySelectorAll('.language-checkbox').forEach(cb => {
   });
 });
 
+// --- フィルター開閉トグル機能を復活させる ---
+
+document.querySelectorAll('.filter-toggle').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const targetId = btn.getAttribute('data-target');
+    const target = document.getElementById(targetId);
+    if (target) {
+      const isOpen = target.style.display !== 'none';
+      target.style.display = isOpen ? 'none' : '';
+      // ボタンの見た目も切り替え
+      btn.textContent = isOpen ? '☐' : '☑';
+    }
+  });
+});
+
+// ページ読み込み時、フィルターを閉じた状態にする
+window.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.filter-toggle').forEach(btn => {
+    const targetId = btn.getAttribute('data-target');
+    const target = document.getElementById(targetId);
+    if (target) {
+      target.style.display = 'none';
+      btn.textContent = '☐';
+    }
+  });
+
+  // スプラッシュ非表示や初期チェックもここで
+  const splash = document.getElementById('splash');
+  setTimeout(() => {
+    splash.classList.add('slide-hide');
+  }, 1200);
+
+  document.querySelectorAll('.region-checkbox').forEach(cb => cb.checked = true);
+});
+
 // 初期表示時
 showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
