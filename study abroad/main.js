@@ -8,8 +8,8 @@ const baseStyles = {
 let map = new maplibregl.Map({
   container: 'map',
   style: baseStyles.carto,
-  center: [15, 30],
-  zoom: 1.2
+  center: [139.9545, 35.8251], // 麗澤大学を中心に
+  zoom: 1.2 // さらに引いたズーム（全ピンがより見やすくなります）
 });
 window.map = map;
 
@@ -119,10 +119,22 @@ function handleUnivPinClick(u, el) {
 
   // --- 飛行機アニメーション（麗澤大学以外のみ） ---
   if (u.region !== "Reitaku University") {
-    const reitakuLngLat = [139.9545, 35.8251];
-    const destLngLat = [u.lng, u.lat];
-    const reitakuPoint = map.project(reitakuLngLat);
-    const destPoint = map.project(destLngLat);
+    let reitakuLngLat = [139.9545, 35.8251];
+    let destLngLat = [u.lng, u.lat];
+
+    // 北米の場合は太平洋を越えるように経路を調整
+    let usePacificRoute = false;
+    if (u.region === "North America" && Math.abs(reitakuLngLat[0] - destLngLat[0]) > 180) {
+      usePacificRoute = true;
+    }
+    // 太平洋ルート判定（東経→西経 or 西経→東経で大きく離れている場合）
+    if (u.region === "North America" && reitakuLngLat[0] > 100 && destLngLat[0] < -50) {
+      usePacificRoute = true;
+    }
+
+    // 経度を調整して太平洋を越えるパスを作る
+    let reitakuPoint = map.project(reitakuLngLat);
+    let destPoint = map.project(destLngLat);
 
     // SVGで軌跡を描画
     let svg = document.getElementById('fly-path');
@@ -137,14 +149,7 @@ function handleUnivPinClick(u, el) {
     svg.style.pointerEvents = 'none';
     svg.style.zIndex = 3999;
 
-    // ベジェ曲線の制御点
-    const dx = destPoint.x - reitakuPoint.x;
-    const dy = destPoint.y - reitakuPoint.y;
-    const curveStrength = 0.18;
-    const cx = (reitakuPoint.x + destPoint.x) / 2 - (dy * curveStrength);
-    const cy = (reitakuPoint.y + destPoint.y) / 2 + (dx * curveStrength);
-
-    // SVGパス
+    // パス生成
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('fill', 'none');
     path.setAttribute('stroke', '#a6192e');
@@ -155,13 +160,32 @@ function handleUnivPinClick(u, el) {
 
     // パスのd属性をセット
     function setPathD() {
-      const rp = map.project(reitakuLngLat);
-      const dp = map.project(destLngLat);
-      const cpx = (rp.x + dp.x) / 2 - ((dp.y - rp.y) * curveStrength);
-      const cpy = (rp.y + dp.y) / 2 + ((dp.x - rp.x) * curveStrength);
-      path.setAttribute('d', `M${rp.x},${rp.y} Q${cpx},${cpy} ${dp.x},${dp.y}`);
-      svg.setAttribute('width', window.innerWidth);
-      svg.setAttribute('height', window.innerHeight);
+      let rp = map.project(reitakuLngLat);
+      let dp = map.project(destLngLat);
+
+      if (usePacificRoute) {
+        // 太平洋ルート：経度を+360して一周させる
+        let pacificLngLat = [destLngLat[0] + 360, destLngLat[1]];
+        let pacificPoint = map.project(pacificLngLat);
+
+        // --- ここを修正：制御点を大きく上（北）に持ち上げる ---
+        const curveStrength = 0.45; // ←値を大きくして上方向に
+        // 中間点を大きく北に持ち上げる
+        const cpx = (rp.x + pacificPoint.x) / 2;
+        const cpy = (rp.y + pacificPoint.y) / 2 - 100; // -400pxで大きく上へ
+
+        path.setAttribute('d', `M${rp.x},${rp.y} Q${cpx},${cpy} ${pacificPoint.x},${pacificPoint.y}`);
+        svg.setAttribute('width', window.innerWidth);
+        svg.setAttribute('height', window.innerHeight);
+      } else {
+        // 通常ルート
+        const curveStrength = 0.18;
+        const cpx = (rp.x + dp.x) / 2 - ((dp.y - rp.y) * curveStrength);
+        const cpy = (rp.y + dp.y) / 2 + ((dp.x - rp.x) * curveStrength);
+        path.setAttribute('d', `M${rp.x},${rp.y} Q${cpx},${cpy} ${dp.x},${dp.y}`);
+        svg.setAttribute('width', window.innerWidth);
+        svg.setAttribute('height', window.innerHeight);
+      }
     }
     setPathD();
     svg.appendChild(path);
@@ -196,6 +220,8 @@ function handleUnivPinClick(u, el) {
     }
     plane.style.filter = filter;
 
+    const dx = destPoint.x - reitakuPoint.x;
+    const dy = destPoint.y - reitakuPoint.y;
     const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
     if (u.region === "North America") {
       plane.style.transform = `rotate(${angle}deg) scaleY(-1)`;
@@ -219,23 +245,47 @@ function handleUnivPinClick(u, el) {
         plane.remove();
         return;
       }
-      // 現在のパス座標を再計算
-      const rp = map.project(reitakuLngLat);
-      const dp = map.project(destLngLat);
-      const cpx = (rp.x + dp.x) / 2 - ((dp.y - rp.y) * curveStrength);
-      const cpy = (rp.y + dp.y) / 2 + ((dp.x - rp.x) * curveStrength);
-      // 飛行機の位置
-      const x = bezier(t, rp.x, cpx, dp.x);
-      const y = bezier(t, rp.y, cpy, dp.y);
-      const scale = 1 + 0.3 * Math.sin(Math.PI * t);
-      if (u.region === "North America") {
-        plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${scale})`;
+      let rp = map.project(reitakuLngLat);
+      let dp = map.project(destLngLat);
+
+      if (usePacificRoute) {
+        // 太平洋ルート
+        let pacificLngLat = [destLngLat[0] + 360, destLngLat[1]];
+        let pacificPoint = map.project(pacificLngLat);
+
+        // 軌跡と同じ制御点（上を大きく通る）
+        const cpx = (rp.x + pacificPoint.x) / 2;
+        const cpy = (rp.y + pacificPoint.y) / 2 - 100; // 軌跡と同じ値
+
+        // ベジェ曲線で飛行機の位置を計算
+        const x = bezier(t, rp.x, cpx, pacificPoint.x);
+        const y = bezier(t, rp.y, cpy, pacificPoint.y);
+        const scale = 1 + 0.3 * Math.sin(Math.PI * t);
+        plane.style.left = `${x - 19}px`;
+        plane.style.top = `${y - 19}px`;
+        plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
+        if (u.region === "North America") {
+          plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${scale})`;
+        } else {
+          plane.style.transform = `rotate(${angle}deg) scale(${scale})`;
+        }
       } else {
-        plane.style.transform = `rotate(${angle}deg) scale(${scale})`;
+        // 通常ルート
+        const curveStrength = 0.18;
+        const cpx = (rp.x + dp.x) / 2 - ((dp.y - rp.y) * curveStrength);
+        const cpy = (rp.y + dp.y) / 2 + ((dp.x - rp.x) * curveStrength);
+        const x = bezier(t, rp.x, cpx, dp.x);
+        const y = bezier(t, rp.y, cpy, dp.y);
+        const scale = 1 + 0.3 * Math.sin(Math.PI * t);
+        plane.style.left = `${x - 19}px`;
+        plane.style.top = `${y - 19}px`;
+        plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
+        if (u.region === "North America") {
+          plane.style.transform = `rotate(${angle}deg) scaleY(-1) scale(${scale})`;
+        } else {
+          plane.style.transform = `rotate(${angle}deg) scale(${scale})`;
+        }
       }
-      plane.style.left = `${x - 19}px`;
-      plane.style.top = `${y - 19}px`;
-      plane.style.filter = `${filter} drop-shadow(0 4px 12px #0006) opacity(${0.7 + 0.3 * (1 - Math.abs(0.5 - t) * 2)})`;
       requestAnimationFrame(animatePlane);
     }
     animatePlane();
@@ -291,11 +341,25 @@ function handleUnivPinClick(u, el) {
     midTime.style.whiteSpace = 'nowrap';
 
     function setMidPlanePosition() {
-      const midPoint = map.project([midLng, midLat]);
-      midPlane.style.left = `${midPoint.x - 19}px`;
-      midPlane.style.top = `${midPoint.y - 19}px`;
-      midTime.style.left = `${midPoint.x + 25}px`;
-      midTime.style.top = `${midPoint.y - 10}px`;
+      let midX, midY;
+      if (usePacificRoute) {
+        // 太平洋ルートの場合、+360した座標で中間点を計算
+        let rp = map.project(reitakuLngLat);
+        let pacificLngLat = [destLngLat[0] + 360, destLngLat[1]];
+        let pacificPoint = map.project(pacificLngLat);
+        midX = (rp.x + pacificPoint.x) / 2;
+        midY = (rp.y + pacificPoint.y) / 2;
+      } else {
+        // 通常ルート
+        let rp = map.project(reitakuLngLat);
+        let dp = map.project(destLngLat);
+        midX = (rp.x + dp.x) / 2;
+        midY = (rp.y + dp.y) / 2;
+      }
+      midPlane.style.left = `${midX - 19}px`;
+      midPlane.style.top = `${midY - 19}px`;
+      midTime.style.left = `${midX + 25}px`;
+      midTime.style.top = `${midY - 10}px`;
     }
     setMidPlanePosition();
     document.body.appendChild(midPlane);
