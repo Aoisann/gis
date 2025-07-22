@@ -427,8 +427,9 @@ function handleUnivPinClick(u, el) {
       zoomBtn.textContent = 'Zoom out';
       zoomBtn.id = 'zoom-out-univ';
       zoomBtn.onclick = function() {
+        // 最初のMAPの位置（麗澤大学中心・ズーム1.2）に戻す
         map.flyTo({
-          center: [15, 30],
+          center: [139.9545, 35.8251],
           zoom: 1.2,
           speed: 1.2
         });
