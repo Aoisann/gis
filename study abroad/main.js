@@ -393,53 +393,42 @@ document.querySelectorAll('.region-checkbox').forEach(cb => {
   });
 });
 
-// 「すべて選択」チェックボックス
+// --- フィルター全選択の制御を統一 ---
+
+// 地域フィルター「全て」
 document.getElementById('region-all').addEventListener('change', function(e) {
   const checked = e.target.checked;
-  document.querySelectorAll('.region-checkbox').forEach(cb => cb.checked = checked);
-  showMarkersByRegion(getSelectedRegions());
+  document.querySelectorAll('.region-checkbox').forEach(cb => {
+    cb.checked = checked;
+  });
+  showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
 });
 
-// 言語フィルターのチェックボックスにイベントを追加
-document.querySelectorAll('.language-checkbox').forEach(cb => {
+// 言語フィルター「全て」
+document.getElementById('language-all').addEventListener('change', function(e) {
+  const checked = e.target.checked;
+  document.querySelectorAll('.language-checkbox').forEach(cb => {
+    cb.checked = checked;
+  });
+  showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
+});
+
+// 地域フィルター個別チェック時、「全て」の状態を自動制御
+document.querySelectorAll('.region-checkbox').forEach(cb => {
   cb.addEventListener('change', function() {
+    const all = document.getElementById('region-all');
+    const boxes = document.querySelectorAll('.region-checkbox');
+    all.checked = Array.from(boxes).every(b => b.checked);
     showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
   });
 });
 
-// フィルターボタンのクリックイベント
-document.querySelectorAll('.filter-toggle').forEach(btn => {
-  const targetId = btn.getAttribute('data-target');
-  const target = document.getElementById(targetId);
-  target.style.display = 'none';
-  btn.textContent = '☑';
-  btn.classList.add('closed');
-
-  btn.addEventListener('click', function() {
-    if (target.style.display === 'none') {
-      target.style.display = '';
-      btn.textContent = '✕';
-      btn.classList.remove('closed');
-    } else {
-      target.style.display = 'none';
-      btn.textContent = '☑';
-      btn.classList.add('closed');
-    }
-  });
-});
-
-// 「全て」チェックボックス（言語フィルター）
-document.getElementById('language-all').addEventListener('change', function(e) {
-  const checked = e.target.checked;
-  document.querySelectorAll('.language-checkbox').forEach(cb => cb.checked = checked);
-  showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
-});
-
-// 言語フィルターの個別チェックボックスで「全て」の状態を制御
+// 言語フィルター個別チェック時、「全て」の状態を自動制御
 document.querySelectorAll('.language-checkbox').forEach(cb => {
   cb.addEventListener('change', function() {
-    const allChecked = Array.from(document.querySelectorAll('.language-checkbox')).every(cb => cb.checked);
-    document.getElementById('language-all').checked = allChecked;
+    const all = document.getElementById('language-all');
+    const boxes = document.querySelectorAll('.language-checkbox');
+    all.checked = Array.from(boxes).every(b => b.checked);
     showMarkersByRegion(getSelectedRegions(), getSelectedLanguages());
   });
 });
