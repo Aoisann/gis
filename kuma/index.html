@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日本中心のマップ</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; width: 100vw; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- PapaParse: CSVパーサー -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <!-- d3: 色スケール用 -->
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <script>
+    // 日本中心の座標（東京付近）
+    var map = L.map('map').setView([36.2048, 138.2529], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 都道府県GeoJSONのURL（外部リポジトリを利用）
+    var geojsonUrl = 'https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson';
+
+    // CSVデータの読み込み
+    function loadCSV(callback) {
+      Papa.parse('kumasee.csv', {
+        download: true,
+        header: true,
+        complete: function(results) {
+          callback(results.data);
+        }
+      });
+    }
+
+    // GeoJSONとCSVを両方読み込んでから処理
+    Promise.all([
+      fetch(geojsonUrl).then(res => res.json()),
+      new Promise(resolve => loadCSV(resolve))
+    ]).then(function([geojson, csvData]) {
+      // 最新年度を取得
+      const years = csvData.map(row => row['年度']);
+      const latestYear = years.sort().reverse()[0];
+      // 最新年度の都道府県ごとの耕地面積を抽出
+      const areaByPref = {};
+      csvData.forEach(row => {
+        if (row['年度'] === latestYear) {
+          // 数値化（カンマ除去）
+          areaByPref[row['都道府県']] = Number(row['耕地面積'].replace(/,/g, ''));
+        }
+      });
+
+      // 色スケール（d3のYlGnBuを利用）
+      const areas = Object.values(areaByPref);
+      const minArea = Math.min(...areas);
+      const maxArea = Math.max(...areas);
+      const colorScale = d3.scaleSequential()
+        .domain([minArea, maxArea])
+        .interpolator(d3.interpolateYlGnBu);
+
+      // GeoJSONの各都道府県に色を割り当てて表示
+      L.geoJSON(geojson, {
+        style: function(feature) {
+          const pref = feature.properties.name_ja;
+          const area = areaByPref[pref];
+          return {
+            color: '#333',
+            weight: 1,
+            fillColor: area ? colorScale(area) : '#ccc',
+            fillOpacity: 0.7
+          };
+        },
+        onEachFeature: function(feature, layer) {
+          const pref = feature.properties.name_ja;
+          const area = areaByPref[pref];
+          layer.bindPopup(`<b>${pref}</b><br>耕地面積: ${area ? area.toLocaleString() + ' ha' : 'データなし'}`);
+        }
+      }).addTo(map);
+    });
+  </script>
+</body>
+</html>

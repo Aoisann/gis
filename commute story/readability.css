@@ -1,0 +1,45 @@
+/* Side-view walking scene: the person stays left while road and lamps pass by. */
+.endless-road{left:0;right:0;bottom:0;height:39%;clip-path:none;background:linear-gradient(#101225 0 5%,#070810 5% 82%,#121426 82%)}
+.endless-road::before{left:0;top:9%;width:100%;height:2px;transform:none;background:rgba(190,187,214,.2)}
+.endless-road::after{display:none}
+.endless-road b{left:0;top:58%;width:120%;height:5px;background:repeating-linear-gradient(90deg,rgba(255,241,188,.72) 0 55px,transparent 55px 145px);animation:road-left 1.25s linear infinite}
+.loop-lamps{width:125vw;animation:lamps-left 9s linear infinite}
+.loop-lamps.back{opacity:.2;transform:none;animation:lamps-left 15s linear infinite}
+.loop-lamps i{bottom:31%;height:42%}
+.loop-lamps i:nth-child(1){left:0}.loop-lamps i:nth-child(2){left:25vw}.loop-lamps i:nth-child(3){left:50vw}.loop-lamps i:nth-child(4){left:75vw}.loop-lamps i:nth-child(5){left:100vw}
+.traveler{left:13%;bottom:12%;width:38px;height:108px;transform:none}
+.traveler::before{left:8px;width:22px;height:22px;background:#27283a}
+.traveler span{left:8px;top:23px;width:22px;height:50px;background:#202132}
+.traveler span::before,.traveler span::after{top:42px;width:6px;height:38px}
+body.vehicle-mode .traveler{transform:translateY(35px) scale(.7)}
+
+/* Japanese typography: deliberate line lengths, stronger contrast, calmer scale. */
+.hero-copy h1{font-size:clamp(2.7rem,5.15vw,5.5rem);line-height:1.28}
+.heading h2,.proposal-content h2,.final-copy h2{font-size:clamp(2.05rem,3.65vw,3.75rem);line-height:1.43;letter-spacing:-.018em}
+.cabin-copy h2{font-size:clamp(2.2rem,4vw,4.1rem);line-height:1.42}
+.heading>p:last-child,.proposal-content>p:not(.eyebrow,.enter-car),.cabin-copy>p:not(.eyebrow),.final-copy>p:not(.eyebrow),.intro{color:#d2d0dc;font-size:clamp(.84rem,1.05vw,.98rem);line-height:2;max-width:44rem;text-shadow:0 2px 12px rgba(0,0,0,.75)}
+.subtitle{color:#ece9f5;font-size:clamp(.88rem,1.1vw,1rem);font-weight:500}
+.route-board p,.worry-copy li,.tech-grid article>p{color:#c7c4d2}.worry-copy li{font-size:.83rem}.large{color:#f0ecdf}.tech-grid h3{color:#f5f1e7}.tech-grid dl{color:#d2d0db}.panel::before{background:linear-gradient(90deg,rgba(4,5,12,.9),rgba(6,7,16,.58) 56%,rgba(6,7,16,.22))}.panel:nth-child(even)::before{background:linear-gradient(90deg,rgba(4,5,12,.82),rgba(7,8,18,.45) 62%,rgba(7,8,18,.18))}
+.foreground-traveler{position:fixed;z-index:30;left:8%;bottom:11%;width:40px;height:112px;pointer-events:none;transition:opacity .65s,transform .65s;filter:drop-shadow(0 0 9px rgba(255,215,120,.2))}.foreground-traveler::before{content:"";position:absolute;left:9px;top:0;width:22px;height:22px;border-radius:50%;background:#3b3a48;border:1px solid rgba(255,215,120,.35)}.foreground-traveler span{position:absolute;left:8px;top:24px;width:24px;height:49px;border-radius:45% 45% 18% 18%;background:#292a39;border:1px solid rgba(255,215,120,.25)}.foreground-traveler span::before,.foreground-traveler span::after{content:"";position:absolute;top:43px;width:6px;height:39px;background:#252633;transform-origin:top;animation:foreground-walk .72s ease-in-out infinite alternate}.foreground-traveler span::before{left:2px;transform:rotate(17deg)}.foreground-traveler span::after{right:2px;transform:rotate(-17deg)}body.vehicle-mode .foreground-traveler{opacity:0;transform:translateY(30px) scale(.72)}
+@keyframes lamps-left{to{transform:translateX(-25vw)}}
+@keyframes road-left{to{background-position:-145px 0}}
+@keyframes foreground-walk{to{transform:rotate(-17deg)}}
+@media(max-width:900px){.heading h2,.proposal-content h2,.final-copy h2{font-size:clamp(1.8rem,5.6vw,2.8rem)}.traveler{left:9%}}
+@media(max-width:600px){.hero-copy h1{font-size:clamp(2.2rem,10vw,3.25rem)}.heading h2,.proposal-content h2,.final-copy h2,.cabin-copy h2{font-size:clamp(1.65rem,7.4vw,2.15rem);line-height:1.48}.heading>p:last-child,.proposal-content>p:not(.eyebrow,.enter-car),.cabin-copy>p:not(.eyebrow),.final-copy>p:not(.eyebrow),.intro{font-size:.82rem;line-height:1.9}.traveler{left:8%;bottom:15%;transform:scale(.82);transform-origin:bottom}.loop-lamps i{bottom:30%;height:40%}.panel::before{background:rgba(4,5,12,.58)}}
+.journey-bg .traveler{display:none}
+.foreground-traveler{left:3%;bottom:4%}
+/* Slower, wider-spaced night walk under visible pools of lamplight. */
+.journey-bg{background:linear-gradient(#11162d 0 61%,#20233b 61% 69%,#0d0f18 69%)}
+.sky-glow{background:radial-gradient(circle at 68% 18%,rgba(142,130,205,.28),transparent 30%),linear-gradient(rgba(74,75,111,.08),rgba(255,218,135,.035))}
+.loop-lamps{width:166.66vw;animation:lamps-wide-left 18s linear infinite}
+.loop-lamps.back{opacity:.3;animation:lamps-wide-left 30s linear infinite}
+.loop-lamps i{background:#202237;filter:drop-shadow(0 12px 20px rgba(255,215,120,.12))}
+.loop-lamps i::after{background:#ffe298;box-shadow:0 0 24px 9px rgba(255,215,120,.62),0 55px 70px 24px rgba(255,205,105,.12)}
+.loop-lamps i:nth-child(1){left:0}.loop-lamps i:nth-child(2){left:33.33vw}.loop-lamps i:nth-child(3){left:66.66vw}.loop-lamps i:nth-child(4){left:100vw}.loop-lamps i:nth-child(5){left:133.33vw}
+.endless-road{background:linear-gradient(#262943 0 5%,#121522 5% 82%,#1b1e30 82%)}
+.endless-road b{animation:road-left 2.6s linear infinite}
+.panel::before{background:linear-gradient(90deg,rgba(7,8,18,.78),rgba(12,14,29,.4) 58%,rgba(12,14,29,.14))}
+.panel:nth-child(even)::before{background:linear-gradient(90deg,rgba(7,8,18,.72),rgba(12,14,29,.34) 62%,rgba(12,14,29,.12))}
+.foreground-traveler span::before,.foreground-traveler span::after{animation-duration:1.05s}
+@keyframes lamps-wide-left{to{transform:translateX(-33.33vw)}}
+@media(prefers-reduced-motion:reduce){.loop-lamps,.endless-road b,.foreground-traveler span::before,.foreground-traveler span::after{animation:none}}
